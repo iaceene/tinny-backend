@@ -1,0 +1,20 @@
+{
+  "name": "routing-system",
+  "version": "1.0.0",
+  "description": "simple routing system",
+  "license": "ISC",
+  "author": "yassine ajagrou",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "start": "nodemon ./dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "@types/ws": "^8.18.1",
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "ws": "^8.21.0"
+  }
+}
