@@ -1,12 +1,33 @@
-import Server, { type ServerReq, type ServerRes } from "./server.js";
+import Server, { type ServerReq, type ServerRes, type AddOption } from "./server.js";
+
+
 
 const srv = new Server({})
 
-srv.add("GET", "/", (req: ServerReq, res: ServerRes)=>{
-    res.send(200, {
-        status: "goood",
-        working: "good"
-    })
+srv.add({
+    method: "GET",
+    handler: (req: ServerReq, res: ServerRes)=>{
+        console.log("first function")
+    },
+    next: (req: ServerReq, res: ServerRes)=>{
+        console.log("second function")
+        res.send(200, {
+            "contacts" : [
+                "contact1",
+                "contact2",
+                "contact3"
+            ]
+        }, {
+            key: "hhh",
+            value: "efefefe"
+        })
+    },
+    path: "/contacts",
+    middelWares: [(req: ServerReq, res: ServerRes)=>{
+        
+    }, (req, res)=>{
+        console.log("second middel ware")
+    }],
 })
 
-srv.listen()
+srv.listen(true)

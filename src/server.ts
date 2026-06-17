@@ -1,9 +1,34 @@
-import { randomBytes, setEngine } from "crypto"
-import { Socket } from "dgram"
+import { randomBytes } from "crypto"
+import fs from "fs"
+import path from "path"
 import * as http from "http"
 import * as net from "net"
+import { fileURLToPath } from 'url';
 
 export type HandlerFun = (req: ServerReq, res: ServerRes)=>void 
+
+export type AddOption = {
+    method: Methods,
+    path: string,
+    handler: HandlerFun,
+    middelWares?: HandlerFun[],
+    next?: HandlerFun
+}
+
+export type LoginOpt = {
+    username: string,
+    password: string
+}
+
+export type Headers = {
+    key: string,
+    value: string
+}
+
+export type Cookie = {
+    key: string,
+    value: string
+}
 
 export type ServerOptions = {
     port?: number,
@@ -18,9 +43,15 @@ export type ServerReq = http.IncomingMessage & {
 
 export type ServerRes = http.ServerResponse & {
     body?: any
-    send: (status: number, data: any)=>void,
+    send: (status: number, data?: any, headers?: Headers)=>void,
+    sendFile: (status: number, ContentType: string, data?: any, headers?: Headers)=>void,
     isClosed: boolean,
     server: Server
+    coockie: (key: string, value: string)=>string
+    getAllCookies: () => string
+    setCookie: (name: string, value: string) => void
+    getCookie: (name: string) => Cookie | null
+    addCookie: (name: string, value: string) => void
 }
 
 export type Methods = "POST" | "GET" | "PUT" | "DELETE"
@@ -86,13 +117,13 @@ export default class Server {
         return this.PORT
     }
 
-    add(method: Methods, path: string, handler: Function, middelWares?: HandlerFun[], next?: (req: ServerReq, res: ServerRes)=>void ){
+    add(opt: AddOption){
         this.methodHandler.push({
-            method,
-            handler,
-            path : path.replace(/(?<=.)\/+$/, ""),
-            middelWares,
-            next
+            method: opt.method,
+            handler: opt.handler,
+            path : opt.path.replace(/(?<=.)\/+$/, ""),
+            middelWares: opt.middelWares,
+            next: opt.next
         })
     }
 
@@ -108,6 +139,34 @@ export default class Server {
         return this.decorators.filter((dec) => dec.name === name)[0]
     }
 
+    SendFile(res: ServerRes, FILE: string){
+        const __filename = fileURLToPath(import.meta.url);
+        const projectRoot = path.resolve(__filename, '..', '..');
+        const __dirname = projectRoot;
+        const filePath = path.join(__dirname, 'public', FILE)
+        const extName = String(path.extname(filePath)).toLowerCase()
+        const mimeTypes = {
+            '.html': 'text/html',
+            '.css': 'text/css',
+            '.js': 'text/javascript',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.json': 'application/json'
+        };
+        const contentType = (mimeTypes as any)[extName] || 'application/octet-stream';
+        fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            const errorPagePath = path.join(__dirname, 'public', '404.html');
+            res.sendFile(404, 'text/html', {
+                PATH: errorPagePath
+            })
+        } else 
+            res.sendFile(200, contentType, {
+                PATH : filePath
+            })
+    });
+    }
+
     constructor(args: ServerOptions){
         this.sessions = []
         this.decorators = []
@@ -117,55 +176,54 @@ export default class Server {
 
         this.server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse)=>{
             let body: string = "";
-            (res as ServerRes).isClosed = false
+            let cookies: Cookie[] = [];
+            
+            
+            (res as ServerRes).isClosed = false;
 
-            if (typeof req.headers["content-type"] !== "undefined" && req.headers["content-type"] != 'application/json'){
-                res.writeHead(400, {'content-type': 'application/json'})
-                res.end(JSON.stringify({
-                    "Error" : "cannot accepte incoming messages that not a json type"
-                }))
-                return;
+           
+            (res as ServerRes).getCookie = (name: string): Cookie | null => {
+                if (cookies.length !== 0)
+                    for (let i = 0; i < cookies.length; i++)
+                        if (cookies[i]?.key === name)
+                            return cookies[i] ?? null
+                return null
             }
 
-            if (typeof req.headers["tiny-session"] === "undefined"){
-                let session = this.getSession(req.socket.remoteAddress ?? "me")
-                if (typeof session === "undefined")
-                    session = this.generateSession(req.socket.remoteAddress ?? "me")
-                session.reqCount++;
-                if (session.reqCount >= (args.reqPerMinute ?? 10) && Date.now() - session.lastReq < 60000)
-                {
-                    res.writeHead(429, {'content-type': 'application/json'})
-                    res.end(JSON.stringify({
-                        "Error" : `Too Many Requests, banned for ${(new Date(session.banInterval)).getMinutes()} minute, your last req at ${(new Date(session.lastReq)).toTimeString()}`,
-                        "Next-Retry" : `${(new Date(session.lastReq + session.banInterval)).toTimeString()}`
-                    }))
-                    return
-                }
-                if (session.reqCount > (args.reqPerMinute ?? 10) || Date.now() - session.lastReq >= session.banInterval){
-                    session.reqCount = 0
-                    session.banInterval *= 2
-                }
-                session.lastReq = Date.now()
-            }else{
-                let session = this.getSession(req.socket.remoteAddress ?? "me")
-                if (typeof session === "undefined")
-                    session = this.generateSession(req.socket.remoteAddress ?? "me")
-                session.reqCount++;
-                if (session.reqCount >= (args.reqPerMinute ?? 10) && Date.now() - session.lastReq < 60000)
-                {
-                    res.writeHead(429, {'content-type': 'application/json'})
-                    res.end(JSON.stringify({
-                        "Error" : `Too Many Requests, banned for ${(new Date(session.banInterval)).getMinutes()} minute, your last req at ${(new Date(session.lastReq)).toTimeString()}`,
-                        "Next-Retry" : `${(new Date(session.lastReq + session.banInterval)).toTimeString()}`
-                    }))
-                    return
-                }
-                if (session.reqCount > (args.reqPerMinute ?? 10) || Date.now() - session.lastReq > session.banInterval){
-                    session.reqCount = 0
-                    session.banInterval *= 2
-                }
-                session.lastReq = Date.now()
+            (res as ServerRes).setCookie = (name: string, value: string) => {
+                for (let i = 0; i < cookies.length; i++)
+                    if (name === cookies[i]?.key)
+                        (cookies[i] as any).value = value
             }
+
+            (res as ServerRes).addCookie = (name: string, value: string)=>{
+                if (name === "" || value === "")
+                    return
+                if ((res as ServerRes).getCookie(name) != null)
+                    return (res as ServerRes).setCookie(name, value);
+                cookies.push({ key: name, value })
+            }
+
+            (res as ServerRes).getAllCookies = (): string => {
+                let buffer: string = ""
+                for (let i = 0; i < cookies.length; i++)
+                    buffer = `${buffer}${(buffer.length != 0 ? "; " : "")}${cookies[i]?.key}=${cookies[i]?.value}`
+                console.log(buffer)
+                return buffer
+            }
+
+            const setCookies = (cookies: string | undefined)=>{
+                if (!cookies || cookies === "")
+                    return
+                const pairs = cookies.split("; ")
+                if (!pairs)
+                    return
+                for (let i = 0; i < pairs.length; i++)
+                (res as ServerRes).addCookie(pairs[i]?.split("=")[0] ?? "", pairs[i]?.split("=")[1] ?? "")
+            }
+
+            setCookies(req.headers["cookie"]);
+    
 
             req.on("data", (chunk)=>{
                 body += chunk.toString();
@@ -175,15 +233,34 @@ export default class Server {
                 (req as ServerReq).server = this;
                 (res as ServerRes).server = this;
                 req.url = req.url === "/" ? "/" : req.url?.replace(/(?<=.)\/+$/, "");
-                (res as ServerRes).send = (status: number, data?: any)=>{
+                (res as ServerRes).send = (status: number, data?: any, headers?: Headers)=>{
                     if (!(res as ServerRes).isClosed){
-                        res.writeHead(status, { 'Content-Type': 'application/json', 'tiny-session' : this.getSession(req.socket.remoteAddress ?? "me")?.key ?? '' });
+                        res.writeHead(status, { 'Content-Type': 'application/json', 'Set-Cookie' : (res as ServerRes).getAllCookies(),  ...headers});
                         res.end(data ? JSON.stringify(data) : "");
                         (res as ServerRes).isClosed = true;
                     } else {
                         console.error(`Multipple replays on ${req.url}`)
                     }
                 }
+
+                (res as ServerRes).sendFile = (status: number, ContentType: string, data?: any, headers?: Headers)=>{
+                    console.log(`path = ${data.PATH}`)
+                    if (!(res as ServerRes).isClosed){
+                        fs.readFile(data.PATH, (err, fileData) => {
+                            if (err) {
+                                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                                res.end('500 - Internal Error or File Not Found');
+                                return;
+                            }
+                            res.writeHead(status, { 'Content-Type': ContentType, 'Set-Cookie' : (res as ServerRes).getAllCookies(),  ...headers});
+                            res.end(fileData);
+                            (res as ServerRes).isClosed = true;
+                        });
+                    } else {
+                        console.error(`Multipple replays on ${req.url}`)
+                    }
+                }
+
                 (req as ServerReq).body = body ? JSON.parse(body) : null
                 let handlersCount = 0
                 for(let i = 0; i < this.methodHandler.length; i++){
@@ -220,7 +297,59 @@ export default class Server {
         })
     }
 
-    listen(callback?: () => void){
+    monitor(server: Server, username: string, password: string){
+
+        const Auth = (req: ServerReq, res: ServerRes)=>{
+            const key = res.getCookie("adminkey")
+            if (!key || (key as any) !== "yassine")
+                return res.send(401, {"Error": "Access denied"})
+        }
+
+        server.add({
+            method: "GET",
+            handler: (req: ServerReq, res: ServerRes) =>{
+                        server.SendFile(res, "login/index.html")
+                    },
+            path: "/" 
+        })
+        server.add({
+            method: "GET",
+            handler: (req: ServerReq, res: ServerRes) =>{
+                        server.SendFile(res, "login/css/style.css")
+                    },
+            path: "/css/style.css" 
+        })
+        server.add({
+            method: "GET",
+            middelWares: [Auth],
+            handler: (req: ServerReq, res: ServerRes) =>{
+                        server.SendFile(res, "page/index.html")
+                    },
+            path: "/admin" 
+        })
+
+        server.add({
+            method: "POST",
+            handler: (req: ServerReq, res: ServerRes) => {
+                if (!req.body.username || req.body.username !== username || !req.body.password || req.body.password !== password){
+                        res.send(403, {"Error" : "Access Denied"})
+                        return
+                }
+                res.addCookie("adminkey", "yassine")
+                res.send(200, { "name": `${req.body.username}`, "password": `${req.body.password}` })
+            },
+            path: "/api/login" 
+        })
+
+
+        server.listen(false, ()=>{
+            console.log(`Monitor start listening in http://${this.hostname}:${this.PORT + 1}`)
+        })
+    }
+
+    listen(enableMon?: boolean, callback?: () => void, login?: LoginOpt){
+        if (enableMon)
+            this.monitor(new Server({port: this.PORT + 1}), login?.username ?? "admin", login?.password ?? "password");
         this.server.listen(this.PORT, callback ?? (()=>{
             console.log(`Server start listening in http://${this.hostname}:${this.PORT}`)
         }))
