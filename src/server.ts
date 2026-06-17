@@ -1,9 +1,11 @@
 import { randomBytes } from "crypto"
 import fs from "fs"
-import path from "path"
+import path, { join } from "path"
 import * as http from "http"
 import * as net from "net"
 import { fileURLToPath } from 'url';
+import { readdir } from 'node:fs/promises';
+
 
 export type HandlerFun = (req: ServerReq, res: ServerRes)=>void 
 
@@ -39,6 +41,15 @@ export type ServerOptions = {
 export type ServerReq = http.IncomingMessage & {
     body?: any,
     server: Server
+}
+
+export type ServFiles = {
+    FileName: string,
+    prefix: string
+}
+
+export type DirFiles = {
+    files: ServFiles[]
 }
 
 export type ServerRes = http.ServerResponse & {
@@ -139,11 +150,66 @@ export default class Server {
         return this.decorators.filter((dec) => dec.name === name)[0]
     }
 
+    async readDir(DIR: string, prefix: string): Promise<DirFiles | null>{
+        try {
+            const entries = await readdir(DIR, { recursive: true, withFileTypes: true });
+            const result: DirFiles = {files: []};
+
+            for (const entry of entries)
+                if (!entry.isDirectory())
+                    result.files.push({ FileName: join(entry.parentPath, entry.name), prefix :  join(prefix, entry.name) })
+            return result;
+        } 
+        catch (error) {
+            console.error(`Error reading directory: ${DIR}`, error);
+        }
+        return null;
+    }
+
+    async servDir(DIR: string, pref: string){
+        const files = await this.readDir(DIR, pref)
+        console.log(files)
+        if (!files){
+            console.log("Failed to serve this dir")
+            return;
+        }
+
+        console.log(files)
+
+        for (let i = 0; i < files.files.length; i++){
+            const filename = files.files[i]?.FileName;
+            const prefix = files.files[i]?.prefix;
+            if (!filename || !prefix)
+                break;
+            if (path.basename(filename).startsWith("index")){
+                    this.add({
+                    method: "GET",
+                    path: `/${path.dirname(prefix)}`,
+                    handler: (req: ServerReq, res: ServerRes)=>{
+                        this.SendFile(res, filename)
+                        return
+                    }
+                    }) 
+                    console.log("serving", filename, "as default file")
+            }
+            this.add({
+                method: "GET",
+                path: `/${prefix}`,
+                handler: (req: ServerReq, res: ServerRes)=>{
+                    this.SendFile(res, filename)
+                    return
+                }
+            })
+        }
+
+    }
+
     SendFile(res: ServerRes, FILE: string){
         const __filename = fileURLToPath(import.meta.url);
         const projectRoot = path.resolve(__filename, '..', '..');
         const __dirname = projectRoot;
-        const filePath = path.join(__dirname, 'public', FILE)
+        const filePath = path.join(__dirname, FILE)
+        console.log("filePath =>", filePath, "DIRNAME", __dirname)
         const extName = String(path.extname(filePath)).toLowerCase()
         const mimeTypes = {
             '.html': 'text/html',
@@ -174,9 +240,12 @@ export default class Server {
         this.hostname = args.hostname ?? "localhost"
         this.PORT = args.port ?? 3000
 
+        
         this.server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse)=>{
             let body: string = "";
             let cookies: Cookie[] = [];
+
+            console.log("URL", req.url);
             
             
             (res as ServerRes).isClosed = false;
@@ -308,23 +377,32 @@ export default class Server {
 
     monitor(server: Server, username: string, password: string){
 
-        const Auth = (req: ServerReq, res: ServerRes)=>{
+        const isAuthed = (req: ServerReq, res: ServerRes): boolean =>{
             const key = res.getCookie("adminkey")
             if (!key || (key as any).value !== "yassine")
+                return false
+            return true
+        }
+
+        const Auth = (req: ServerReq, res: ServerRes)=>{
+            if (!isAuthed(req, res))
                 return res.send(401, {"Error": "Access denied"})
         }
 
         server.add({
             method: "GET",
             handler: (req: ServerReq, res: ServerRes) =>{
-                        server.SendFile(res, "login/index.html")
+                        if (isAuthed(req, res))
+                            server.SendFile(res, "public/page/index.html")
+                        else
+                            server.SendFile(res, "public/login/index.html")
                     },
             path: "/" 
         })
         server.add({
             method: "GET",
             handler: (req: ServerReq, res: ServerRes) =>{
-                        server.SendFile(res, "login/css/style.css")
+                        server.SendFile(res, "public/login/css/style.css")
                     },
             path: "/css/style.css" 
         })
@@ -332,7 +410,7 @@ export default class Server {
             method: "GET",
             middelWares: [Auth],
             handler: (req: ServerReq, res: ServerRes) =>{
-                        server.SendFile(res, "page/index.html")
+                        server.SendFile(res, "public/page/index.html")
                     },
             path: "/admin" 
         })
@@ -354,12 +432,14 @@ export default class Server {
             method: "GET",
             middelWares: [Auth],
             path: "/admin/status",
-            handler: (req: ServerReq, res: ServerRes) => {
+            handler: async (req: ServerReq, res: ServerRes) => {
                 res.send(200, {
-                    ...process.env
+                    "ok" : "fw"
                 })
             }
         })
+
+        server.servDir("./public/doc", "docs")
 
 
         server.listen(false, ()=>{
