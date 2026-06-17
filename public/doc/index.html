@@ -3,9 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation of tinny backend</title>
+    <title>Routing System - API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        section {
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #764ba2;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .endpoint {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        
+        .method.get {
+            background: #61affe;
+            color: white;
+        }
+        
+        .method.post {
+            background: #49cc90;
+            color: white;
+        }
+        
+        .path {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        .description {
+            margin: 10px 0;
+            color: #555;
+        }
+        
+        .auth-required {
+            background: #ffe6e6;
+            color: #cc0000;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            display: inline-block;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+        
+        .example {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .response {
+            background: #f0f8ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        
+        .response-title {
+            font-weight: bold;
+            color: #2196F3;
+            margin-bottom: 5px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list li:before {
+            content: "✓ ";
+            color: #49cc90;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
-    
+    <div class="container">
+        <header>
+            <h1>🚀 Routing System</h1>
+            <p>Lightweight TypeScript Backend API Documentation</p>
+        </header>
+        
+        <div class="content">
+            <section>
+                <h2>Overview</h2>
+                <p>A tiny but powerful HTTP server built with Node.js and TypeScript featuring:</p>
+                <ul class="feature-list">
+                    <li>Dynamic routing with GET, POST, PUT, DELETE methods</li>
+                    <li>Cookie-based authentication system</li>
+                    <li>Middleware support</li>
+                    <li>Automatic directory serving with index.html defaults</li>
+                    <li>Built-in file serving with MIME type detection</li>
+                    <li>Session management</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>API Endpoints</h2>
+                
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="path">/</span>
+                    <div class="description">Root endpoint - shows login page or admin page based on authentication</div>
+                </div>
+                
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="path">/admin</span>
+                    <span class="auth-required">AUTH REQUIRED</span>
+                    <div class="description">Admin dashboard page (redirects to login if not authenticated)</div>
+                </div>
+                
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="path">/api/login</span>
+                    <div class="description">Authenticate user and receive admin cookie</div>
+                    <div class="example">
+                        <div class="example-title">Request:</div>
+                        <pre>{
+  "username": "admin",
+  "password": "password"
+}</pre>
+                        <div class="response">
+                            <div class="response-title">Success Response (200):</div>
+                            <pre>{
+  "name": "admin",
+  "password": "password"
+}</pre>
+                        </div>
+                        <div class="response">
+                            <div class="response-title">Error Response (403):</div>
+                            <pre>{
+  "Error": "Access Denied"
+}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="path">/admin/status</span>
+                    <span class="auth-required">AUTH REQUIRED</span>
+                    <div class="description">Get server status and file information</div>
+                    <div class="response">
+                        <div class="response-title">Response (200):</div>
+                        <pre>{
+  "ok": "fw"
+}</pre>
+                    </div>
+                </div>
+                
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="path">/css/style.css</span>
+                    <div class="description">Serve login page CSS stylesheet</div>
+                </div>
+                
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="path">/docs/*</span>
+                    <div class="description">Serve documentation files from public/doc directory</div>
+                </div>
+            </section>
+            
+            <section>
+                <h2>Authentication</h2>
+                <p>The system uses cookie-based authentication with the key <code>adminkey</code>.</p>
+                <h3>Login Flow:</h3>
+                <ol style="margin-left: 20px; line-height: 2;">
+                    <li>POST credentials to <code>/api/login</code></li>
+                    <li>Server validates and sets <code>adminkey</code> cookie</li>
+                    <li>Use the cookie to access protected routes</li>
+                    <li>Protected routes verify cookie before serving content</li>
+                </ol>
+            </section>
+            
+            <section>
+                <h2>Quick Start</h2>
+                <div class="example">
+                    <div class="example-title">1. Build the project:</div>
+                    <pre>tsc</pre>
+                </div>
+                <div class="example">
+                    <div class="example-title">2. Start the server:</div>
+                    <pre>node ./dist/index.js</pre>
+                </div>
+                <div class="example">
+                    <div class="example-title">3. Access the application:</div>
+                    <pre>http://localhost:3000</pre>
+                </div>
+                <div class="example">
+                    <div class="example-title">4. Login with credentials:</div>
+                    <pre>curl -X POST http://localhost:3000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"password"}'</pre>
+                </div>
+            </section>
+            
+            <section>
+                <h2>File Serving</h2>
+                <p>Automatically serve HTML, CSS, JS, images and JSON files from the <code>public/</code> directory.</p>
+                <h3>Supported MIME Types:</h3>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li>.html → text/html</li>
+                    <li>.css → text/css</li>
+                    <li>.js → text/javascript</li>
+                    <li>.png → image/png</li>
+                    <li>.jpg → image/jpeg</li>
+                    <li>.json → application/json</li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>Note:</strong> index.html files are automatically served as directory defaults</p>
+            </section>
+            
+            <section>
+                <h2>Features</h2>
+                <h3>Middleware Support</h3>
+                <p>Routes support middleware functions that execute before the main handler, useful for authentication and validation.</p>
+                
+                <h3>Session Management</h3>
+                <p>Track user sessions by IP address with automatic key generation and ban intervals.</p>
+                
+                <h3>Cookie Management</h3>
+                <p>Built-in cookie manipulation with getter, setter, and cookie persistence across requests.</p>
+                
+                <h3>Directory Auto-Serving</h3>
+                <p>Use <code>servDir()</code> to automatically create routes for all files in a directory with index file support.</p>
+            </section>
+        </div>
+        
+        <footer>
+            <p>Routing System Documentation v1.0 | Built with ❤️ using TypeScript & Node.js</p>
+        </footer>
+    </div>
 </body>
 </html>
