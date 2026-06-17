@@ -48,7 +48,7 @@ export type ServerRes = http.ServerResponse & {
     isClosed: boolean,
     server: Server
     coockie: (key: string, value: string)=>string
-    getAllCookies: () => string
+    getAllCookies: () => string[]
     setCookie: (name: string, value: string) => void
     getCookie: (name: string) => Cookie | null
     addCookie: (name: string, value: string) => void
@@ -204,12 +204,11 @@ export default class Server {
                 cookies.push({ key: name, value })
             }
 
-            (res as ServerRes).getAllCookies = (): string => {
-                let buffer: string = ""
+            (res as ServerRes).getAllCookies = (): string[] => {
+                const ArrayBuffer: string[] = []
                 for (let i = 0; i < cookies.length; i++)
-                    buffer = `${buffer}${(buffer.length != 0 ? "; " : "")}${cookies[i]?.key}=${cookies[i]?.value}`
-                console.log(buffer)
-                return buffer
+                    ArrayBuffer.push(`${cookies[i]?.key}=${cookies[i]?.value}; Path=/; SameSite=Lax`)
+                return ArrayBuffer
             }
 
             const setCookies = (cookies: string | undefined)=>{
@@ -219,7 +218,7 @@ export default class Server {
                 if (!pairs)
                     return
                 for (let i = 0; i < pairs.length; i++)
-                (res as ServerRes).addCookie(pairs[i]?.split("=")[0] ?? "", pairs[i]?.split("=")[1] ?? "")
+                    (res as ServerRes).addCookie(pairs[i]?.split("=")[0] ?? "", pairs[i]?.split("=")[1] ?? "")
             }
 
             setCookies(req.headers["cookie"]);
@@ -235,7 +234,12 @@ export default class Server {
                 req.url = req.url === "/" ? "/" : req.url?.replace(/(?<=.)\/+$/, "");
                 (res as ServerRes).send = (status: number, data?: any, headers?: Headers)=>{
                     if (!(res as ServerRes).isClosed){
-                        res.writeHead(status, { 'Content-Type': 'application/json', 'Set-Cookie' : (res as ServerRes).getAllCookies(),  ...headers});
+                        const cookies = (res as ServerRes).getAllCookies();
+                        const headerObj: any = { 'Content-Type': 'application/json', ...headers };
+                        if (cookies.length > 0)
+                            headerObj['Set-Cookie'] = cookies;
+                        console.log(headerObj)
+                        res.writeHead(status, headerObj);
                         res.end(data ? JSON.stringify(data) : "");
                         (res as ServerRes).isClosed = true;
                     } else {
@@ -252,7 +256,11 @@ export default class Server {
                                 res.end('500 - Internal Error or File Not Found');
                                 return;
                             }
-                            res.writeHead(status, { 'Content-Type': ContentType, 'Set-Cookie' : (res as ServerRes).getAllCookies(),  ...headers});
+                            const cookies = (res as ServerRes).getAllCookies();
+                            const headerObj: any = { 'Content-Type': ContentType, ...headers };
+                            if (cookies.length > 0)
+                                headerObj['Set-Cookie'] = cookies;
+                            res.writeHead(status, headerObj);
                             res.end(fileData);
                             (res as ServerRes).isClosed = true;
                         });
@@ -269,7 +277,8 @@ export default class Server {
                     ){
                         if (this.methodHandler[i]?.middelWares)
                             this.methodHandler[i]?.middelWares?.forEach((middelware) => middelware((req as ServerReq), (res as ServerRes)))
-                        this.methodHandler[i]?.handler(req, res);
+                        if (!(res as ServerRes).isClosed)
+                            this.methodHandler[i]?.handler(req, res);
                         const nextFn = this.methodHandler[i]?.next
                         if (typeof nextFn === "function")
                             nextFn((req as ServerReq), (res as ServerRes))
@@ -301,7 +310,7 @@ export default class Server {
 
         const Auth = (req: ServerReq, res: ServerRes)=>{
             const key = res.getCookie("adminkey")
-            if (!key || (key as any) !== "yassine")
+            if (!key || (key as any).value !== "yassine")
                 return res.send(401, {"Error": "Access denied"})
         }
 
@@ -339,6 +348,17 @@ export default class Server {
                 res.send(200, { "name": `${req.body.username}`, "password": `${req.body.password}` })
             },
             path: "/api/login" 
+        })
+
+        server.add({
+            method: "GET",
+            middelWares: [Auth],
+            path: "/admin/status",
+            handler: (req: ServerReq, res: ServerRes) => {
+                res.send(200, {
+                    ...process.env
+                })
+            }
         })
 
 
