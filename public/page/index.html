@@ -1,11 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>admin</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin Dashboard | Server Status</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #1a1d23;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      color: #e2e6ed;
+    }
+
+    .dashboard {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .title-section h1 {
+      font-weight: 500;
+      font-size: 1.8rem;
+      letter-spacing: -0.3px;
+      color: #d4d9e2;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .title-section h1 i {
+      color: #8b9dc3;
+      font-size: 1.8rem;
+    }
+    .sub {
+      color: #7c8291;
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .refresh-btn {
+      background: #252830;
+      border: 1px solid #3a3f4b;
+      color: #b9c2d9;
+      padding: 0.6rem 1.3rem;
+      border-radius: 2.5rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+    .refresh-btn:hover {
+      background: #2f343d;
+      border-color: #5a6275;
+      color: #dde3f0;
+    }
+    .refresh-btn i {
+      font-size: 0.9rem;
+    }
+
+    /* Circular stats row */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+    .stat-circle-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 100px;
+    }
+    .circle-wrapper {
+      position: relative;
+      width: 90px;
+      height: 90px;
+    }
+    .circle-svg {
+      transform: rotate(-90deg);
+      width: 90px;
+      height: 90px;
+    }
+    .circle-bg {
+      fill: none;
+      stroke: #2b2f38;
+      stroke-width: 6;
+    }
+    .circle-progress {
+      fill: none;
+      stroke: #6d8ecc;
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.6s ease;
+    }
+    .circle-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-weight: 500;
+      color: #cfd7e6;
+    }
+    .circle-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .circle-unit {
+      font-size: 0.7rem;
+      color: #9199ab;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #8f96a8;
+      font-weight: 500;
+      text-align: center;
+    }
+    .stat-detail {
+      font-size: 0.7rem;
+      color: #6f7686;
+      margin-top: -0.3rem;
+    }
+
+    /* Memory bar card */
+    .memory-bar-card {
+      background: #21242b;
+      border: 1px solid #32363f;
+      border-radius: 1.2rem;
+      padding: 1.2rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 180px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+    }
+    .memory-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #9da4b8;
+      font-weight: 500;
+    }
+    .memory-bar-bg {
+      background: #2a2e37;
+      height: 8px;
+      border-radius: 20px;
+      overflow: hidden;
+      width: 100%;
+    }
+    .memory-bar-fill {
+      background: #6d8ecc;
+      height: 100%;
+      border-radius: 20px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .memory-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #7a8193;
+    }
+
+    /* Info cards row */
+    .info-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .info-card {
+      background: #21242b;
+      border: 1px solid #32363f;
+      border-radius: 1rem;
+      padding: 0.9rem 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    }
+    .info-card i {
+      color: #7c8db0;
+      font-size: 1.2rem;
+    }
+    .info-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .info-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: #838b9c;
+    }
+    .info-value {
+      font-weight: 600;
+      color: #d4dceb;
+    }
+
+    /* Terminal logger */
+    .terminal-panel {
+      background: #16181d;
+      border: 1px solid #2d313a;
+      border-radius: 1.3rem;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      height: 380px;
+    }
+    .terminal-header {
+      background: #1e2128;
+      padding: 0.7rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid #2f333d;
+    }
+    .terminal-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-red { background: #f56565; }
+    .dot-yellow { background: #ecc94b; }
+    .dot-green { background: #48bb78; }
+    .terminal-title {
+      margin-left: 0.8rem;
+      color: #a0a8bb;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .terminal-body {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      overflow-y: auto;
+      font-family: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #cbd5e0;
+      background: #0e1015;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .terminal-line {
+      display: flex;
+      gap: 0.6rem;
+      align-items: baseline;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      padding: 0.2rem 0;
+      word-break: break-all;
+    }
+    .terminal-prompt {
+      color: #718096;
+      user-select: none;
+    }
+    .terminal-timestamp {
+      color: #636d83;
+      margin-right: 0.5rem;
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+    .terminal-message {
+      color: #cfd8e8;
+    }
+    .terminal-error {
+      color: #fc8181;
+    }
+
+    .loading-text {
+      color: #8892a8;
+      font-style: italic;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 1rem;
+      }
+      .stats-row {
+        gap: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    
+  <div class="dashboard">
+    <div class="header">
+      <div class="title-section">
+        <h1><i class="fas fa-cube"></i> System Overview</h1>
+        <div class="sub">
+          <i class="fas fa-sync-alt fa-spin" id="loading-indicator" style="display: none;"></i>
+          <span id="last-updated">Awaiting data...</span>
+        </div>
+      </div>
+      <button class="refresh-btn" id="refresh-btn">
+        <i class="fas fa-arrows-rotate"></i> Refresh status
+      </button>
+    </div>
+
+    <!-- Circular stats + memory bar -->
+    <div class="stats-row" id="stats-row">
+      <div class="loading-text">Loading metrics...</div>
+    </div>
+
+    <!-- Additional info chips -->
+    <div class="info-cards" id="info-cards"></div>
+
+    <!-- Terminal logger -->
+    <div class="terminal-panel">
+      <div class="terminal-header">
+        <span class="terminal-dot dot-red"></span>
+        <span class="terminal-dot dot-yellow"></span>
+        <span class="terminal-dot dot-green"></span>
+        <span class="terminal-title">messages — logs (live every 2s)</span>
+        <span style="margin-left: auto; font-size:0.7rem; color:#6b7280;" id="message-count">0</span>
+      </div>
+      <div class="terminal-body" id="terminal-body">
+        <div class="terminal-line"><span class="terminal-prompt">$</span> waiting for messages...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const STATUS_URL = '/admin/status';
+      const MESSAGES_URL = '/messages';
+
+      const statsRow = document.getElementById('stats-row');
+      const infoCards = document.getElementById('info-cards');
+      const terminalBody = document.getElementById('terminal-body');
+      const messageCountSpan = document.getElementById('message-count');
+      const lastUpdatedSpan = document.getElementById('last-updated');
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const refreshBtn = document.getElementById('refresh-btn');
+
+      // Helper: extract numeric value from strings like "7.92 GB"
+      function parseGB(str) {
+        if (!str) return 0;
+        const num = parseFloat(str.replace(/[^0-9.]/g, ''));
+        return isNaN(num) ? 0 : num;
+      }
+
+      function computeCpuPercent(times) {
+        if (!times) return 0;
+        const total = (times.user||0)+(times.nice||0)+(times.sys||0)+(times.idle||0)+(times.irq||0);
+        if (total === 0) return 0;
+        return parseFloat((((total - times.idle) / total) * 100).toFixed(1));
+      }
+
+      function renderStatus(data) {
+        const cpuModel = data.Cpu?.model || 'Unknown';
+        const cpuSpeed = data.Cpu?.speed ? `${data.Cpu.speed} MHz` : '';
+        const cpuPercent = computeCpuPercent(data.Cpu?.times);
+        const memUsed = data['Used Memory'] || '0 GB';
+        const memTotal = data['Memory'] || '8 GB';
+        const memFree = data['Free Memory'] || '0 GB';
+        const usedGb = parseGB(memUsed);
+        const totalGb = parseGB(memTotal);
+        const memPercent = totalGb > 0 ? (usedGb / totalGb) * 100 : 0;
+        const machineUptime = data['Machin uptime'] || '—';
+        const serverUptime = data['Server uptime'] || '—';
+        const arch = data['Arch'] || '—';
+        const platform = data['Platform'] || '—';
+        const clients = data['Connected clients'] ?? 0;
+        const requests = data['Total requests'] ?? 0;
+
+        // Build circular stats (CPU, memory circle, uptimes as circles)
+        const circumference = 2 * Math.PI * 38; // r=38
+        const cpuOffset = circumference - (cpuPercent / 100) * circumference;
+        const memCircleOffset = circumference - (memPercent / 100) * circumference;
+
+        statsRow.innerHTML = `
+          <div class="stat-circle-group">
+            <div class="circle-wrapper">
+              <svg class="circle-svg" viewBox="0 0 90 90">
+                <circle class="circle-bg" cx="45" cy="45" r="38"/>
+                <circle class="circle-progress" cx="45" cy="45" r="38" stroke-dasharray="${circumference}" stroke-dashoffset="${cpuOffset}"/>
+              </svg>
+              <div class="circle-inner">
+                <span class="circle-value">${cpuPercent}%</span>
+                <span class="circle-unit">CPU</span>
+              </div>
+            </div>
+            <span class="stat-label">${cpuModel}</span>
+            <span class="stat-detail">${cpuSpeed}</span>
+          </div>
+
+          <div class="stat-circle-group">
+            <div class="circle-wrapper">
+              <svg class="circle-svg" viewBox="0 0 90 90">
+                <circle class="circle-bg" cx="45" cy="45" r="38"/>
+                <circle class="circle-progress" cx="45" cy="45" r="38" stroke-dasharray="${circumference}" stroke-dashoffset="${memCircleOffset}"/>
+              </svg>
+              <div class="circle-inner">
+                <span class="circle-value">${usedGb.toFixed(1)}</span>
+                <span class="circle-unit">/ ${totalGb.toFixed(0)} GB</span>
+              </div>
+            </div>
+            <span class="stat-label">Memory</span>
+          </div>
+
+          <div class="memory-bar-card">
+            <div class="memory-header">
+              <span><i class="fas fa-memory"></i> RAM</span>
+              <span>${memUsed} / ${memTotal}</span>
+            </div>
+            <div class="memory-bar-bg">
+              <div class="memory-bar-fill" style="width:${memPercent}%;"></div>
+            </div>
+            <div class="memory-stats">
+              <span>Used: ${memUsed}</span>
+              <span>Free: ${memFree}</span>
+            </div>
+          </div>
+
+          <div class="stat-circle-group">
+            <div class="circle-wrapper" style="width:70px; height:70px;">
+              <div class="circle-inner" style="width:100%;">
+                <span class="circle-value" style="font-size:1rem;">${machineUptime}</span>
+              </div>
+            </div>
+            <span class="stat-label">Machine uptime</span>
+          </div>
+
+          <div class="stat-circle-group">
+            <div class="circle-wrapper" style="width:70px; height:70px;">
+              <div class="circle-inner" style="width:100%;">
+                <span class="circle-value" style="font-size:1rem;">${serverUptime}</span>
+              </div>
+            </div>
+            <span class="stat-label">Server uptime</span>
+          </div>
+        `;
+
+        infoCards.innerHTML = `
+          <div class="info-card"><i class="fas fa-microchip"></i><div class="info-text"><span class="info-label">Architecture</span><span class="info-value">${arch} / ${platform}</span></div></div>
+          <div class="info-card"><i class="fas fa-plug"></i><div class="info-text"><span class="info-label">Clients</span><span class="info-value">${clients}</span></div></div>
+          <div class="info-card"><i class="fas fa-globe"></i><div class="info-text"><span class="info-label">Requests</span><span class="info-value">${requests}</span></div></div>
+        `;
+
+        lastUpdatedSpan.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      }
+
+      function escapeHtml(text) {
+        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      function appendTerminalMessage(msg) {
+        if (!msg) return;
+        const messageText = msg.message || '';
+        const type = msg.type || 'info';
+        const date = msg.date || new Date().toLocaleString();
+        const lineClass = type === 'error' ? 'terminal-error' : 'terminal-message';
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        line.innerHTML = `<span class="terminal-prompt">❯</span><span class="terminal-timestamp">[${escapeHtml(date)}]</span><span class="${lineClass}">${escapeHtml(messageText)}</span>`;
+        terminalBody.appendChild(line);
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+        // Update count
+        const currentCount = terminalBody.querySelectorAll('.terminal-line').length;
+        messageCountSpan.textContent = `${currentCount} lines`;
+      }
+
+      async function fetchStatus() {
+        loadingIndicator.style.display = 'inline-block';
+        try {
+          const res = await fetch(STATUS_URL);
+          if (!res.ok) throw new Error(`Status ${res.status}`);
+          const data = await res.json();
+          renderStatus(data);
+        } catch (err) {
+          console.error('Status fetch error', err);
+          statsRow.innerHTML = `<div style="color:#f87171;">Failed to load status.</div>`;
+        } finally {
+          loadingIndicator.style.display = 'none';
+        }
+      }
+
+      async function fetchMessages() {
+        try {
+          const res = await fetch(MESSAGES_URL);
+          if (!res.ok) return;
+          const data = await res.json();
+          // Expect array of messages or object with logs/messages array
+          const messages = Array.isArray(data) ? data : (data.logs || data.messages || []);
+          if (messages.length === 0) return;
+          // Clear terminal if needed? We'll keep appending, but avoid duplicates by clearing on first load? 
+          // Better: we maintain last fetched length. Simple approach: replace all messages every fetch to keep terminal aligned.
+          // For live terminal feel we append new ones. We'll compare length.
+          const currentLines = terminalBody.querySelectorAll('.terminal-line').length;
+          if (currentLines === 0 || messages.length > currentLines) {
+            // Append only new messages
+            const newMessages = messages.slice(currentLines);
+            newMessages.forEach(m => appendTerminalMessage(m));
+          } else if (messages.length < currentLines) {
+            // reset if backend trimmed
+            terminalBody.innerHTML = '';
+            messages.forEach(m => appendTerminalMessage(m));
+          }
+        } catch (e) {
+          console.warn('Messages fetch error', e);
+        }
+      }
+
+      // Initial load
+      fetchStatus();
+      fetchMessages(); // initial messages
+
+      // Poll messages every 2 seconds
+      setInterval(fetchMessages, 2000);
+
+      refreshBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        fetchStatus();
+        fetchMessages();
+      });
+
+      // Optional status refresh every 60s
+      setInterval(fetchStatus, 60000);
+    })();
+  </script>
 </body>
 </html>

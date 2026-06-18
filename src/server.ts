@@ -5,6 +5,7 @@ import * as http from "http"
 import * as net from "net"
 import { fileURLToPath } from 'url';
 import { readdir } from 'node:fs/promises';
+import * as os from "node:os";
 
 
 export type HandlerFun = (req: ServerReq, res: ServerRes)=>void 
@@ -15,6 +16,12 @@ export type AddOption = {
     handler: HandlerFun,
     middelWares?: HandlerFun[],
     next?: HandlerFun
+}
+
+export type Logs = {
+    message: string,
+    type: "message" | "error",
+    date: string
 }
 
 export type LoginOpt = {
@@ -99,6 +106,9 @@ export default class Server {
     private decorators: Decorator[]
     private server
     private sessions: Session[]
+    private uptime: number
+    private reqCount: number
+    private logs: Logs[]
 
     private generateKey(): string{
         return randomBytes(16).toString('hex')
@@ -161,20 +171,17 @@ export default class Server {
             return result;
         } 
         catch (error) {
-            console.error(`Error reading directory: ${DIR}`, error);
+            this.log(`Error reading directory: ${DIR} error ${error}`, "error");
         }
         return null;
     }
 
     async servDir(DIR: string, pref: string){
         const files = await this.readDir(DIR, pref)
-        console.log(files)
         if (!files){
-            console.log("Failed to serve this dir")
+            this.log("Failed to serve this dir", "error")
             return;
         }
-
-        console.log(files)
 
         for (let i = 0; i < files.files.length; i++){
             const filename = files.files[i]?.FileName;
@@ -190,7 +197,7 @@ export default class Server {
                         return
                     }
                     }) 
-                    console.log("serving", filename, "as default file")
+                    this.log(`serving ${filename} as default file`)
             }
             this.add({
                 method: "GET",
@@ -209,7 +216,6 @@ export default class Server {
         const projectRoot = path.resolve(__filename, '..', '..');
         const __dirname = projectRoot;
         const filePath = path.join(__dirname, FILE)
-        console.log("filePath =>", filePath, "DIRNAME", __dirname)
         const extName = String(path.extname(filePath)).toLowerCase()
         const mimeTypes = {
             '.html': 'text/html',
@@ -233,19 +239,34 @@ export default class Server {
     });
     }
 
+    log(message: string, type?: "error" | "message"){
+        if (this.logs.length > 20)
+            this.logs.shift()
+        this.logs.push({
+                            message,
+                            type: type ?? "message",
+                            date: new Date().toDateString()
+                        });
+    }
+
     constructor(args: ServerOptions){
         this.sessions = []
         this.decorators = []
         this.methodHandler = []
         this.hostname = args.hostname ?? "localhost"
         this.PORT = args.port ?? 3000
+        this.uptime = Date.now()
+        this.reqCount = 0
+        this.logs = []
 
-        
+
         this.server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse)=>{
             let body: string = "";
             let cookies: Cookie[] = [];
+            this.reqCount++;
 
-            console.log("URL", req.url);
+
+            this.log(`a client requested ${req.url}`);
             
             
             (res as ServerRes).isClosed = false;
@@ -312,12 +333,11 @@ export default class Server {
                         res.end(data ? JSON.stringify(data) : "");
                         (res as ServerRes).isClosed = true;
                     } else {
-                        console.error(`Multipple replays on ${req.url}`)
+                        this.log(`Multipple replays on ${req.url}`, "error")
                     }
                 }
 
                 (res as ServerRes).sendFile = (status: number, ContentType: string, data?: any, headers?: Headers)=>{
-                    console.log(`path = ${data.PATH}`)
                     if (!(res as ServerRes).isClosed){
                         fs.readFile(data.PATH, (err, fileData) => {
                             if (err) {
@@ -334,7 +354,7 @@ export default class Server {
                             (res as ServerRes).isClosed = true;
                         });
                     } else {
-                        console.error(`Multipple replays on ${req.url}`)
+                        this.log(`Multipple replays on ${req.url}`, "error")
                     }
                 }
 
@@ -359,19 +379,19 @@ export default class Server {
             })
         })
         this.server.on("connection", (socket: net.Socket)=>{
-            console.log(`new connention recieved ip ${socket.remoteAddress} on port ${socket.remotePort}`)
+            this.log(`new connention recieved ip ${socket.remoteAddress} on port ${socket.remotePort}`)
             socket.on("close", (hadError: boolean)=>{
-                console.log(`client has drop the connection ${socket.remoteAddress}, ${hadError ? "With an error" : "Without an error"}`)
+                this.log(`client has drop the connection ${socket.remoteAddress}}`, hadError ? "error" : "message")
             })
             socket.on("error", (err: Error)=>{
-                console.error(`connection failed with ${socket.remoteAddress}, cause : ${err.message}`)
+                this.log(`connection failed with ${socket.remoteAddress}, cause : ${err.message}`, "error")
             })
         })
         this.server.on("close", ()=>{
-            console.log(`Server has successfully stopped accepting connections`)
+            this.log(`Server has successfully stopped accepting connections`)
         })
         this.server.on("error", (err: Error)=>{
-            console.error(err)
+            this.log(err.message, "error")
         })
     }
 
@@ -434,7 +454,28 @@ export default class Server {
             path: "/admin/status",
             handler: async (req: ServerReq, res: ServerRes) => {
                 res.send(200, {
-                    "ok" : "fw"
+                    "Machin uptime": `${Math.floor(os.uptime() / 86400)}d ${Math.floor((os.uptime() % 86400) / 3600)}h ${Math.floor((os.uptime() % 3600) / 60)}m`,
+                    "Server uptime": `${Math.floor((Date.now() - this.uptime) / 86400)}d ${Math.floor(((Date.now() - this.uptime) % 86400) / 3600)}h ${Math.floor(((Date.now() - this.uptime) % 3600) / 60)}m`,
+                    "Arch" : os.arch(),
+                    "Platform" : os.platform(),
+                    "Memory" : `${(os.totalmem() / (1024 ** 3)).toFixed(2)} GB`,
+                    "Used Memory" : `${((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2)} GB`,
+                    "Free Memory" : `${(os.freemem() / (1024 ** 3)).toFixed(2)} GB`,
+                    "Cpu" : os.cpus()[0],
+                    "Connected clients" : this.sessions.length,
+                    "Total requests" : this.reqCount,
+                    "logs" : this.logs
+                })
+            }
+        })
+
+        server.add({
+            method: "GET",
+            middelWares: [Auth],
+            path: "/messages",
+            handler: async (req: ServerReq, res: ServerRes) => {
+                res.send(200, {
+                    "logs" : this.logs
                 })
             }
         })
