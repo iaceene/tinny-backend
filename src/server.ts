@@ -440,6 +440,7 @@ export default class Server {
         })
 
         server.servDir("./public/doc", "docs")
+        server.servDir("./public/imgs", "imgs")
 
 
         server.listen(false, ()=>{

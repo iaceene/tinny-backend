@@ -1,350 +1,1364 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Routing System - API Documentation</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-        }
-        
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        
-        .content {
-            padding: 40px;
-        }
-        
-        section {
-            margin-bottom: 40px;
-        }
-        
-        h2 {
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-        
-        h3 {
-            color: #764ba2;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .endpoint {
-            background: #f5f5f5;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
-        
-        .method {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-right: 10px;
-            font-size: 0.9em;
-        }
-        
-        .method.get {
-            background: #61affe;
-            color: white;
-        }
-        
-        .method.post {
-            background: #49cc90;
-            color: white;
-        }
-        
-        .path {
-            font-family: 'Courier New', monospace;
-            background: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            display: inline-block;
-            margin: 10px 0;
-        }
-        
-        .description {
-            margin: 10px 0;
-            color: #555;
-        }
-        
-        .auth-required {
-            background: #ffe6e6;
-            color: #cc0000;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.85em;
-            display: inline-block;
-        }
-        
-        pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 4px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            margin: 10px 0;
-        }
-        
-        .example {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 15px 0;
-        }
-        
-        .example-title {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .response {
-            background: #f0f8ff;
-            border-left: 4px solid #2196F3;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 3px;
-        }
-        
-        .response-title {
-            font-weight: bold;
-            color: #2196F3;
-            margin-bottom: 5px;
-        }
-        
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .feature-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
-        
-        .feature-list li:before {
-            content: "✓ ";
-            color: #49cc90;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        
-        footer {
-            background: #f5f5f5;
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid #ddd;
-            color: #666;
-            font-size: 0.9em;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>TinnyBackend · routing system docs</title>
+  <link rel="shortcut icon" href="/imgs/logo.png" type="image/x-icon">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --text: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --sidebar-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e9eef3;
+      --details-bg: #f9fafc;
+      --details-border: #e2e8f0;
+      --details-open-bg: #ffffff;
+      --code-bg: #f1f5f9;
+      --code-border: #dce3eb;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --nav-text: #334155;
+      --nav-hover-bg: #eef2ff;
+      --nav-hover-text: #1e3a8a;
+      --active-bg: #2563eb;
+      --active-text: #ffffff;
+      --heading: #0f172a;
+      --header-bg: #ffffff;
+      --toggle-btn-bg: #f1f5f9;
+      --table-stripe: #f8fafc;
+      --table-border: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #1a1a1a;
+      --text: #d4d4d4;
+      --text-secondary: #a0a0a0;
+      --text-muted: #808080;
+      --border: #3a3a3a;
+      --sidebar-bg: #222222;
+      --card-bg: #2a2a2a;
+      --card-border: #3a3a3a;
+      --details-bg: #2a2a2a;
+      --details-border: #3a3a3a;
+      --details-open-bg: #252525;
+      --code-bg: #1e1e1e;
+      --code-border: #3a3a3a;
+      --badge-bg: #2a2a2a;
+      --badge-text: #a0a0a0;
+      --nav-text: #b0b0b0;
+      --nav-hover-bg: #333333;
+      --nav-hover-text: #d4d4d4;
+      --active-bg: #404040;
+      --active-text: #ffffff;
+      --heading: #e0e0e0;
+      --header-bg: #222222;
+      --toggle-btn-bg: #333333;
+      --table-stripe: #2a2a2a;
+      --table-border: #3a3a3a;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
+      display: flex;
+      line-height: 1.6;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+      gap: 0.3rem;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, border-color 0.3s ease;
+      z-index: 100;
+      overflow-y: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+      padding: 0 0.5rem;
+    }
+
+    .sidebar-logo img {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+
+    .sidebar-logo span {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--heading);
+    }
+    .sidebar-logo span strong {
+      color: #2563eb;
+    }
+
+    .sidebar-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin: 0.5rem 0 0.5rem;
+      padding-left: 0.7rem;
+      font-weight: 700;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 1rem;
+      border-radius: 0.8rem;
+      color: var(--nav-text);
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .nav-item i {
+      width: 20px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: color 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--nav-hover-bg);
+      color: var(--nav-hover-text);
+    }
+    .nav-item:hover i {
+      color: var(--nav-hover-text);
+    }
+
+    .nav-item.active {
+      background: var(--active-bg);
+      color: var(--active-text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .nav-item.active i {
+      color: var(--active-text);
+    }
+
+    /* GitHub button */
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 1rem;
+    }
+
+    .github-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.8rem;
+      background: #3a3a3a;
+      color: #d4d4d4;
+      font-weight: 600;
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .github-btn:hover {
+      background: #4a4a4a;
+      border-color: #555;
+      transform: translateY(-1px);
+    }
+
+    .github-btn i {
+      font-size: 1.1rem;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      min-height: 100vh;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    /* Header bar */
+    .top-bar {
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.9rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      transition: background 0.3s ease, border-color 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .sidebar-toggle {
+      background: var(--toggle-btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    .version-badge {
+      background: var(--toggle-btn-bg);
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      border: 1px solid var(--border);
+    }
+
+    .theme-toggle {
+      background: var(--toggle-btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    /* Content area */
+    .content {
+      padding: 2.5rem 3rem;
+      max-width: 1100px;
+    }
+
+    .section {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hidden-section {
+      display: none;
+    }
+
+    h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      letter-spacing: -0.3px;
+    }
+
+    h2 i {
+      color: #2563eb;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      font-weight: 650;
+      color: var(--heading);
+      margin: 1.8rem 0 0.8rem;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      border-left: 3px solid #2563eb;
+      padding-left: 1rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 1.3rem;
+      border-radius: 1rem;
+      border: 1px solid var(--card-border);
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-card i {
+      color: #2563eb;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin: 0.3rem 0 0.2rem;
+      font-size: 0.95rem;
+    }
+
+    .stat-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    details {
+      background: var(--details-bg);
+      border: 1px solid var(--details-border);
+      border-radius: 0.9rem;
+      padding: 0.2rem 1.2rem;
+      margin-bottom: 0.8rem;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    details[open] {
+      background: var(--details-open-bg);
+      border-color: #2563eb;
+      box-shadow: var(--shadow-md);
+    }
+
+    summary {
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.9rem 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      color: var(--text);
+      list-style: none;
+    }
+
+    summary i {
+      color: #2563eb;
+      font-size: 0.95rem;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border-radius: 0.7rem;
+      padding: 1rem 1.2rem;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      color: var(--text);
+      margin: 0.8rem 0;
+      white-space: pre-wrap;
+      border: 1px solid var(--code-border);
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      background: transparent !important;
+      padding: 0 !important;
+    }
+    .code-block code {
+      background: transparent !important;
+      padding: 0 !important;
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    .badge {
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin: 0 0.15rem;
+      display: inline-block;
+      border: 1px solid var(--border);
+    }
+
+    .badge-method {
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
+
+    p {
+      margin: 0.5rem 0;
+      line-height: 1.7;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.3rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85em;
+      border: 1px solid var(--code-border);
+    }
+
+    /* Tables */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .info-table th {
+      background: var(--sidebar-bg);
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-weight: 650;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .info-table td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--table-border);
+      color: var(--text-secondary);
+    }
+
+    .info-table tr:nth-child(even) td {
+      background: var(--table-stripe);
+    }
+
+    .info-table td:first-child {
+      font-weight: 600;
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+    }
+
+    ul, ol {
+      margin: 0.5rem 0 0.5rem 1.5rem;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin: 0.3rem 0;
+    }
+
+    strong {
+      color: var(--text);
+    }
+
+    .note {
+      background: var(--details-bg);
+      border-left: 3px solid #2563eb;
+      padding: 0.8rem 1.2rem;
+      border-radius: 0 0.7rem 0.7rem 0;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    /* ===== OVERLAY ===== */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    @media (max-width: 850px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .content {
+        padding: 1.5rem 1rem;
+      }
+      .top-bar {
+        padding: 0.7rem 1rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🚀 Routing System</h1>
-            <p>Lightweight TypeScript Backend API Documentation</p>
-        </header>
-        
-        <div class="content">
-            <section>
-                <h2>Overview</h2>
-                <p>A tiny but powerful HTTP server built with Node.js and TypeScript featuring:</p>
-                <ul class="feature-list">
-                    <li>Dynamic routing with GET, POST, PUT, DELETE methods</li>
-                    <li>Cookie-based authentication system</li>
-                    <li>Middleware support</li>
-                    <li>Automatic directory serving with index.html defaults</li>
-                    <li>Built-in file serving with MIME type detection</li>
-                    <li>Session management</li>
-                </ul>
-            </section>
-            
-            <section>
-                <h2>API Endpoints</h2>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <span class="path">/</span>
-                    <div class="description">Root endpoint - shows login page or admin page based on authentication</div>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <span class="path">/admin</span>
-                    <span class="auth-required">AUTH REQUIRED</span>
-                    <div class="description">Admin dashboard page (redirects to login if not authenticated)</div>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method post">POST</span>
-                    <span class="path">/api/login</span>
-                    <div class="description">Authenticate user and receive admin cookie</div>
-                    <div class="example">
-                        <div class="example-title">Request:</div>
-                        <pre>{
-  "username": "admin",
-  "password": "password"
-}</pre>
-                        <div class="response">
-                            <div class="response-title">Success Response (200):</div>
-                            <pre>{
-  "name": "admin",
-  "password": "password"
-}</pre>
-                        </div>
-                        <div class="response">
-                            <div class="response-title">Error Response (403):</div>
-                            <pre>{
-  "Error": "Access Denied"
-}</pre>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <span class="path">/admin/status</span>
-                    <span class="auth-required">AUTH REQUIRED</span>
-                    <div class="description">Get server status and file information</div>
-                    <div class="response">
-                        <div class="response-title">Response (200):</div>
-                        <pre>{
-  "ok": "fw"
-}</pre>
-                    </div>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <span class="path">/css/style.css</span>
-                    <div class="description">Serve login page CSS stylesheet</div>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <span class="path">/docs/*</span>
-                    <div class="description">Serve documentation files from public/doc directory</div>
-                </div>
-            </section>
-            
-            <section>
-                <h2>Authentication</h2>
-                <p>The system uses cookie-based authentication with the key <code>adminkey</code>.</p>
-                <h3>Login Flow:</h3>
-                <ol style="margin-left: 20px; line-height: 2;">
-                    <li>POST credentials to <code>/api/login</code></li>
-                    <li>Server validates and sets <code>adminkey</code> cookie</li>
-                    <li>Use the cookie to access protected routes</li>
-                    <li>Protected routes verify cookie before serving content</li>
-                </ol>
-            </section>
-            
-            <section>
-                <h2>Quick Start</h2>
-                <div class="example">
-                    <div class="example-title">1. Build the project:</div>
-                    <pre>tsc</pre>
-                </div>
-                <div class="example">
-                    <div class="example-title">2. Start the server:</div>
-                    <pre>node ./dist/index.js</pre>
-                </div>
-                <div class="example">
-                    <div class="example-title">3. Access the application:</div>
-                    <pre>http://localhost:3000</pre>
-                </div>
-                <div class="example">
-                    <div class="example-title">4. Login with credentials:</div>
-                    <pre>curl -X POST http://localhost:3000/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"password"}'</pre>
-                </div>
-            </section>
-            
-            <section>
-                <h2>File Serving</h2>
-                <p>Automatically serve HTML, CSS, JS, images and JSON files from the <code>public/</code> directory.</p>
-                <h3>Supported MIME Types:</h3>
-                <ul style="margin-left: 20px; line-height: 2;">
-                    <li>.html → text/html</li>
-                    <li>.css → text/css</li>
-                    <li>.js → text/javascript</li>
-                    <li>.png → image/png</li>
-                    <li>.jpg → image/jpeg</li>
-                    <li>.json → application/json</li>
-                </ul>
-                <p style="margin-top: 10px;"><strong>Note:</strong> index.html files are automatically served as directory defaults</p>
-            </section>
-            
-            <section>
-                <h2>Features</h2>
-                <h3>Middleware Support</h3>
-                <p>Routes support middleware functions that execute before the main handler, useful for authentication and validation.</p>
-                
-                <h3>Session Management</h3>
-                <p>Track user sessions by IP address with automatic key generation and ban intervals.</p>
-                
-                <h3>Cookie Management</h3>
-                <p>Built-in cookie manipulation with getter, setter, and cookie persistence across requests.</p>
-                
-                <h3>Directory Auto-Serving</h3>
-                <p>Use <code>servDir()</code> to automatically create routes for all files in a directory with index file support.</p>
-            </section>
-        </div>
-        
-        <footer>
-            <p>Routing System Documentation v1.0 | Built with ❤️ using TypeScript & Node.js</p>
-        </footer>
+
+  <!-- ==================== SIDEBAR OVERLAY ==================== -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="/imgs/logo-square.png" alt="logo" onerror="this.style.display='none';this.parentElement.querySelector('span').innerHTML='<i class=\'fas fa-cube\'></i> tinny<strong>backend</strong>'">
+      <span>tinny<strong>backend</strong></span>
     </div>
+    <div class="sidebar-title">navigation</div>
+    <button class="nav-item active" data-section="overview">
+      <i class="fas fa-compass"></i> Overview
+    </button>
+    <button class="nav-item" data-section="server">
+      <i class="fas fa-server"></i> Server class
+    </button>
+    <button class="nav-item" data-section="routing">
+      <i class="fas fa-route"></i> Routing & handlers
+    </button>
+    <button class="nav-item" data-section="middleware">
+      <i class="fas fa-shield-alt"></i> Middleware
+    </button>
+    <button class="nav-item" data-section="files">
+      <i class="fas fa-folder-open"></i> Static files
+    </button>
+    <button class="nav-item" data-section="monitor">
+      <i class="fas fa-chart-line"></i> Monitor
+    </button>
+    <button class="nav-item" data-section="types">
+      <i class="fas fa-code"></i> Types & Reference
+    </button>
+
+    <!-- GitHub button -->
+    <div class="sidebar-footer">
+      <a href="https://github.com" target="_blank" rel="noopener" class="github-btn">
+        <i class="fab fa-github"></i> GitHub Repository
+      </a>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <div class="main-content" id="mainContent">
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="version-badge">
+          <i class="fas fa-code-branch"></i> v2.0 · routing core
+        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+
+    <!-- Content sections -->
+    <div class="content" id="contentArea">
+      
+      <!-- ========== OVERVIEW ========== -->
+      <div id="overview" class="section">
+        <h2><i class="fas fa-play-circle"></i> TinnyBackend Router</h2>
+        <div class="subtitle">A lightweight, type-safe HTTP routing system for Node.js with built-in middleware, cookie management, static file serving, and admin monitoring.</div>
+        
+        <div class="card-grid">
+          <div class="stat-card">
+            <i class="fas fa-bolt"></i><br>
+            <strong>HTTP Methods</strong>
+            <p>GET · POST · PUT · DELETE</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-cookie-bite"></i><br>
+            <strong>Cookie Engine</strong>
+            <p>Native get/set/add with parsing</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-shield"></i><br>
+            <strong>Middleware Chain</strong>
+            <p>Pre-handler execution with next()</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-folder-tree"></i><br>
+            <strong>Static Directory</strong>
+            <p>Auto-index with MIME detection</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-chart-line"></i><br>
+            <strong>Admin Monitor</strong>
+            <p>Built-in dashboard on port+1</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-paint-brush"></i><br>
+            <strong>Decorators</strong>
+            <p>Attach custom metadata to server</p>
+          </div>
+        </div>
+
+        <h3>Architecture Overview</h3>
+        <p>The server is built around a <strong>handler registry</strong> pattern. Each route is registered with a method, path, handler function, optional middleware array, and an optional <code>next</code> callback. When a request arrives, the server iterates through registered handlers, matches by method and path, executes middleware chain, then the main handler.</p>
+        
+        <div class="note">
+          <strong><i class="fas fa-lightbulb"></i> Key Feature:</strong> The <code>res.isClosed</code> flag prevents multiple responses to the same request, eliminating a common class of bugs in HTTP servers.
+        </div>
+
+        <details open>
+          <summary><i class="fas fa-info-circle"></i> Quick Start</summary>
+          <div class="code-block">
+import Server from './server.js';
+
+const app = new Server({ port: 3000, hostname: 'localhost' });
+
+app.add({
+  method: 'GET',
+  path: '/hello',
+  handler: (req, res) => res.send(200, { message: 'Hello World!' })
+});
+
+app.listen();
+// Server running at http://localhost:3000</div>
+        </details>
+      </div>
+
+      <!-- ========== SERVER ========== -->
+      <div id="server" class="section hidden-section">
+        <h2><i class="fas fa-server"></i> Server Class</h2>
+        <div class="subtitle">The core class that creates and manages the HTTP server instance.</div>
+        
+        <h3>Constructor</h3>
+        <details open>
+          <summary><i class="fas fa-cog"></i> new Server(options: ServerOptions)</summary>
+          <table class="info-table">
+            <thead>
+              <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>port</td><td>number</td><td>3000</td><td>Port number to listen on</td></tr>
+              <tr><td>hostname</td><td>string</td><td>"localhost"</td><td>Hostname for the server</td></tr>
+              <tr><td>reqPerMinute</td><td>number</td><td>—</td><td>Rate limiting (requests per minute)</td></tr>
+            </tbody>
+          </table>
+        </details>
+
+        <h3>Core Methods</h3>
+        <details>
+          <summary><i class="fas fa-headphones"></i> .listen(enableMon?, callback?, login?)</summary>
+          <p>Starts the HTTP server on the configured port.</p>
+          <ul>
+            <li><strong>enableMon</strong> (boolean): If <code>true</code>, launches admin monitor on <code>port + 1</code></li>
+            <li><strong>callback</strong> (function): Called when server starts listening</li>
+            <li><strong>login</strong> (LoginOpt): <code>{ username, password }</code> for monitor authentication</li>
+          </ul>
+          <div class="code-block">app.listen(true, () => {
+  console.log('Server + monitor running');
+}, { username: 'admin', password: 'secure123' });</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-paint-brush"></i> .decorate(name, data) & .useDecorator(name)</summary>
+          <p>Store and retrieve custom data on the server instance. Useful for sharing database connections, configs, or service instances across handlers.</p>
+          <div class="code-block">
+server.decorate('db', databaseConnection);
+server.decorate('config', { version: '2.0' });
+
+// Later in a handler:
+const db = server.useDecorator('db');
+const config = server.useDecorator('config');</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-network-wired"></i> .getHost() & .getPort()</summary>
+          <p>Returns the configured hostname and port number respectively.</p>
+          <div class="code-block">console.log(server.getHost()); // "localhost"
+console.log(server.getPort()); // 3000</div>
+        </details>
+
+        <h3>Session Management (Internal)</h3>
+        <p>The server internally tracks sessions with IP-based identification, request counting, and ban intervals for rate limiting:</p>
+        <div class="code-block">
+// Internal session structure
+{
+  ip: string,        // Client IP address
+  lastReq: number,   // Timestamp of last request
+  reqCount: number,  // Number of requests
+  key: string,       // Random session key (32 hex chars)
+  banInterval: number // 60000ms (1 minute)
+}</div>
+      </div>
+
+      <!-- ========== ROUTING ========== -->
+      <div id="routing" class="section hidden-section">
+        <h2><i class="fas fa-route"></i> Routing & Handlers</h2>
+        <div class="subtitle">Register routes with method, path, handlers, and middleware.</div>
+        
+        <h3>Adding Routes</h3>
+        <details open>
+          <summary><i class="fas fa-plus-circle"></i> server.add(option: AddOption)</summary>
+          <table class="info-table">
+            <thead>
+              <tr><th>Property</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>method</td><td>Methods</td><td>Yes</td><td>"GET" | "POST" | "PUT" | "DELETE"</td></tr>
+              <tr><td>path</td><td>string</td><td>Yes</td><td>URL path (trailing slashes auto-trimmed)</td></tr>
+              <tr><td>handler</td><td>HandlerFun</td><td>Yes</td><td>Main request handler function</td></tr>
+              <tr><td>middelWares</td><td>HandlerFun[]</td><td>No</td><td>Array of middleware functions</td></tr>
+              <tr><td>next</td><td>HandlerFun</td><td>No</td><td>Callback executed after main handler</td></tr>
+            </tbody>
+          </table>
+          <div class="code-block">
+server.add({
+  method: 'POST',
+  path: '/api/users',
+  handler: (req, res) => {
+    const user = req.body;
+    // Create user logic...
+    res.send(201, { id: 1, ...user });
+  },
+  middelWares: [authMiddleware, loggerMiddleware],
+  next: (req, res) => {
+    console.log('Response sent for:', req.url);
+  }
+});</div>
+        </details>
+
+        <h3>Request Object (ServerReq)</h3>
+        <p>Extends Node.js <code>http.IncomingMessage</code> with additional properties:</p>
+        <table class="info-table">
+          <thead>
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>body</td><td>any</td><td>Parsed JSON body (auto-parsed from request stream)</td></tr>
+            <tr><td>server</td><td>Server</td><td>Reference to the Server instance</td></tr>
+            <tr><td>method</td><td>string</td><td>HTTP method (inherited)</td></tr>
+            <tr><td>url</td><td>string</td><td>Request URL (inherited, trailing slash trimmed)</td></tr>
+            <tr><td>headers</td><td>object</td><td>Request headers (inherited)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Response Object (ServerRes)</h3>
+        <p>Extends Node.js <code>http.ServerResponse</code> with helper methods:</p>
+        <table class="info-table">
+          <thead>
+            <tr><th>Method/Property</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>.send(status, data?, headers?)</td><td>Send JSON response. Auto-sets Content-Type</td></tr>
+            <tr><td>.sendFile(status, contentType, data, headers?)</td><td>Stream a file from disk with MIME type</td></tr>
+            <tr><td>.isClosed</td><td>Boolean flag preventing duplicate responses</td></tr>
+            <tr><td>.server</td><td>Reference to Server instance</td></tr>
+            <tr><td>.getCookie(name)</td><td>Get cookie by name, returns Cookie or null</td></tr>
+            <tr><td>.setCookie(name, value)</td><td>Update existing cookie value</td></tr>
+            <tr><td>.addCookie(name, value)</td><td>Add new cookie (skips if exists)</td></tr>
+            <tr><td>.getAllCookies()</td><td>Returns all cookies as Set-Cookie header strings</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Path Normalization</h3>
+        <p>All paths automatically have trailing slashes removed (except root <code>/</code>). For example, <code>/api/users/</code> becomes <code>/api/users</code>. This prevents route mismatches.</p>
+      </div>
+
+      <!-- ========== MIDDLEWARE ========== -->
+      <div id="middleware" class="section hidden-section">
+        <h2><i class="fas fa-shield-alt"></i> Middleware</h2>
+        <div class="subtitle">Execute functions before the main handler for authentication, logging, validation, etc.</div>
+        
+        <h3>How Middleware Works</h3>
+        <p>Middleware functions are executed <strong>in order</strong> before the main handler. Each middleware receives <code>(req, res)</code>. If a middleware sends a response (e.g., 401), the <code>isClosed</code> flag prevents the main handler from executing.</p>
+
+        <details open>
+          <summary><i class="fas fa-lock"></i> Authentication Middleware</summary>
+          <div class="code-block">
+const requireAuth = (req, res) => {
+  const token = res.getCookie('auth_token');
+  if (!token || token.value !== 'valid-secret') {
+    res.send(401, { error: 'Unauthorized access' });
+    return; // isClosed = true, main handler won't run
+  }
+};
+
+app.add({
+  method: 'GET',
+  path: '/admin/dashboard',
+  handler: adminDashboardHandler,
+  middelWares: [requireAuth]
+});</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-clock"></i> Request Logger Middleware</summary>
+          <div class="code-block">
+const requestLogger = (req, res) => {
+  const start = Date.now();
+  const originalSend = res.send;
+  
+  res.send = function(...args) {
+    const duration = Date.now() - start;
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - ${duration}ms`);
+    return originalSend.apply(this, args);
+  };
+};
+
+app.add({
+  method: 'GET',
+  path: '/api/data',
+  handler: dataHandler,
+  middelWares: [requestLogger]
+});</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-check-circle"></i> Input Validation Middleware</summary>
+          <div class="code-block">
+const validateBody = (req, res) => {
+  if (!req.body || !req.body.email) {
+    res.send(400, { error: 'Email is required' });
+    return;
+  }
+  if (!req.body.email.includes('@')) {
+    res.send(422, { error: 'Invalid email format' });
+    return;
+  }
+};
+
+app.add({
+  method: 'POST',
+  path: '/subscribe',
+  handler: subscribeHandler,
+  middelWares: [validateBody]
+});</div>
+        </details>
+
+        <h3>The <code>next</code> Callback</h3>
+        <p>After the main handler executes (and if the response isn't closed), the optional <code>next</code> function runs. This is useful for cleanup, logging, or post-processing:</p>
+        <div class="code-block">
+app.add({
+  method: 'DELETE',
+  path: '/cache',
+  handler: clearCacheHandler,
+  next: (req, res) => {
+    console.log('Cache cleared successfully');
+    // Perform additional cleanup...
+  }
+});</div>
+      </div>
+
+      <!-- ========== STATIC FILES ========== -->
+      <div id="files" class="section hidden-section">
+        <h2><i class="fas fa-folder-open"></i> Static Files & Directories</h2>
+        <div class="subtitle">Serve entire directories automatically with MIME type detection.</div>
+        
+        <h3>servDir() Method</h3>
+        <details open>
+          <summary><i class="fas fa-folder"></i> server.servDir(directoryPath, urlPrefix)</summary>
+          <p>Recursively reads a directory and creates GET routes for every file. Files named <code>index.*</code> are also mapped to the directory path as default files.</p>
+          
+          <table class="info-table">
+            <thead>
+              <tr><th>Parameter</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>directoryPath</td><td>Relative path to the directory (e.g., "./public")</td></tr>
+              <tr><td>urlPrefix</td><td>URL prefix for the routes (e.g., "assets")</td></tr>
+            </tbody>
+          </table>
+
+          <div class="code-block">
+// Serve ./public directory at /assets/*
+await server.servDir('./public', 'assets');
+
+// This creates routes like:
+// GET /assets/style.css  → ./public/style.css
+// GET /assets/js/app.js  → ./public/js/app.js
+// GET /assets            → ./public/index.html (auto-index)</div>
+        </details>
+
+        <h3>Supported MIME Types</h3>
+        <table class="info-table">
+          <thead>
+            <tr><th>Extension</th><th>MIME Type</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>.html</td><td>text/html</td></tr>
+            <tr><td>.css</td><td>text/css</td></tr>
+            <tr><td>.js</td><td>text/javascript</td></tr>
+            <tr><td>.json</td><td>application/json</td></tr>
+            <tr><td>.png</td><td>image/png</td></tr>
+            <tr><td>.jpg / .jpeg</td><td>image/jpeg</td></tr>
+            <tr><td>other</td><td>application/octet-stream</td></tr>
+          </tbody>
+        </table>
+
+        <h3>SendFile Method</h3>
+        <details>
+          <summary><i class="fas fa-file"></i> server.SendFile(res, filePath)</summary>
+          <p>Internal method used by <code>servDir()</code>. Can also be called directly to serve individual files:</p>
+          <div class="code-block">
+app.add({
+  method: 'GET',
+  path: '/download/report',
+  handler: (req, res) => {
+    server.SendFile(res, 'reports/summary.pdf');
+  }
+});</div>
+        </details>
+
+        <h3>404 Handling for Files</h3>
+        <p>If a requested file doesn't exist, the server attempts to serve <code>public/404.html</code>. If that also fails, it returns a 500 error.</p>
+      </div>
+
+      <!-- ========== MONITOR ========== -->
+      <div id="monitor" class="section hidden-section">
+        <h2><i class="fas fa-chart-line"></i> Admin Monitor</h2>
+        <div class="subtitle">Built-in web dashboard for server administration on a separate port.</div>
+        
+        <h3>Enabling the Monitor</h3>
+        <details open>
+          <summary><i class="fas fa-user-shield"></i> .listen(true, callback, {username, password})</summary>
+          <p>When <code>enableMon</code> is <code>true</code>, a second server instance starts on <code>port + 1</code> with the following routes:</p>
+          
+          <table class="info-table">
+            <thead>
+              <tr><th>Route</th><th>Method</th><th>Auth</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>/</td><td>GET</td><td>No</td><td>Login page or admin dashboard (if authenticated)</td></tr>
+              <tr><td>/admin</td><td>GET</td><td>Yes</td><td>Main admin dashboard</td></tr>
+              <tr><td>/api/login</td><td>POST</td><td>No</td><td>Authenticate with username/password</td></tr>
+              <tr><td>/admin/status</td><td>GET</td><td>Yes</td><td>Server status endpoint</td></tr>
+              <tr><td>/css/style.css</td><td>GET</td><td>No</td><td>Login page styles</td></tr>
+              <tr><td>/docs/*</td><td>GET</td><td>No</td><td>Serves ./public/doc directory</td></tr>
+              <tr><td>/imgs/*</td><td>GET</td><td>No</td><td>Serves ./public/imgs directory</td></tr>
+            </tbody>
+          </table>
+        </details>
+
+        <h3>Authentication Flow</h3>
+        <ol>
+          <li>User visits <code>/</code> → sees login form</li>
+          <li>Submits credentials to <code>POST /api/login</code></li>
+          <li>On success, server sets cookie <code>adminkey=yassine</code></li>
+          <li>Subsequent requests check this cookie via <code>isAuthed()</code></li>
+          <li>Protected routes use <code>Auth</code> middleware</li>
+        </ol>
+
+        <div class="code-block">
+// Start server with monitor
+app.listen(true, () => {
+  console.log('Main server: http://localhost:3000');
+  console.log('Monitor: http://localhost:3001');
+}, {
+  username: 'admin',
+  password: 'mySecretPass'
+});</div>
+
+        <div class="note">
+          <strong><i class="fas fa-exclamation-triangle"></i> Security Note:</strong> The default cookie value is hardcoded as "yassine". For production use, implement proper session tokens and HTTPS.
+        </div>
+      </div>
+
+      <!-- ========== TYPES & REFERENCE ========== -->
+      <div id="types" class="section hidden-section">
+        <h2><i class="fas fa-code"></i> Types & API Reference</h2>
+        <div class="subtitle">Complete TypeScript type definitions for the TinyBackend system.</div>
+        
+        <h3>Type Definitions</h3>
+        
+        <details open>
+          <summary><i class="fas fa-tag"></i> HTTP Methods</summary>
+          <div class="code-block">type Methods = "POST" | "GET" | "PUT" | "DELETE"</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> Handler Function</summary>
+          <div class="code-block">type HandlerFun = (req: ServerReq, res: ServerRes) => void</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> AddOption (Route Registration)</summary>
+          <div class="code-block">
+type AddOption = {
+  method: Methods;
+  path: string;
+  handler: HandlerFun;
+  middelWares?: HandlerFun[];
+  next?: HandlerFun;
+}</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> ServerOptions</summary>
+          <div class="code-block">
+type ServerOptions = {
+  port?: number;
+  hostname?: string;
+  reqPerMinute?: number;
+}</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> LoginOpt</summary>
+          <div class="code-block">type LoginOpt = { username: string; password: string }</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> Headers & Cookie</summary>
+          <div class="code-block">
+type Headers = { key: string; value: string }
+type Cookie = { key: string; value: string }</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> ServerReq (Full)</summary>
+          <div class="code-block">
+type ServerReq = http.IncomingMessage & {
+  body?: any;
+  server: Server;
+}</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> ServerRes (Full)</summary>
+          <div class="code-block">
+type ServerRes = http.ServerResponse & {
+  body?: any;
+  send: (status: number, data?: any, headers?: Headers) => void;
+  sendFile: (status: number, contentType: string, data?: any, headers?: Headers) => void;
+  isClosed: boolean;
+  server: Server;
+  getCookie: (name: string) => Cookie | null;
+  setCookie: (name: string, value: string) => void;
+  addCookie: (name: string, value: string) => void;
+  getAllCookies: () => string[];
+}</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> Session (Internal)</summary>
+          <div class="code-block">
+type Session = {
+  ip: string;
+  lastReq: number;
+  reqCount: number;
+  key: string;
+  banInterval: number;
+}</div>
+        </details>
+
+        <details>
+          <summary><i class="fas fa-tag"></i> Decorator</summary>
+          <div class="code-block">type Decorator = { name: string; data: any }</div>
+        </details>
+
+        <h3>Complete Example</h3>
+        <div class="code-block">
+import Server from './server.js';
+
+const app = new Server({ port: 3000, hostname: '0.0.0.0' });
+
+// Decorate with shared resources
+app.decorate('startTime', Date.now());
+
+// Authentication middleware
+const auth = (req, res) => {
+  const session = res.getCookie('session_id');
+  if (!session) {
+    res.send(401, { error: 'Please login first' });
+  }
+};
+
+// Public route
+app.add({
+  method: 'GET',
+  path: '/',
+  handler: (req, res) => res.send(200, { 
+    status: 'running',
+    uptime: Date.now() - app.useDecorator('startTime')
+  })
+});
+
+// Protected route with middleware
+app.add({
+  method: 'GET',
+  path: '/api/secret',
+  handler: (req, res) => res.send(200, { data: 'top-secret' }),
+  middelWares: [auth],
+  next: (req, res) => console.log('Secret accessed')
+});
+
+// POST with body parsing
+app.add({
+  method: 'POST',
+  path: '/api/echo',
+  handler: (req, res) => res.send(200, { 
+    received: req.body,
+    cookies: res.getAllCookies()
+  })
+});
+
+// Serve static assets
+await app.servDir('./public', 'static');
+
+// Start with admin monitor
+app.listen(true, () => {
+  console.log('App: http://0.0.0.0:3000');
+  console.log('Admin: http://0.0.0.0:3001');
+}, { username: 'admin', password: 'secure123' });</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+
+  <script>
+    (function() {
+      // ===== DOM ELEMENTS =====
+      const html = document.documentElement;
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const themeToggle = document.getElementById('themeToggle');
+      const hljsLight = document.getElementById('hljs-light');
+      const hljsDark = document.getElementById('hljs-dark');
+      const navItems = document.querySelectorAll('.nav-item');
+
+      // ===== SIDEBAR TOGGLE =====
+      let sidebarVisible = true;
+
+      function updateSidebarState() {
+        if (window.innerWidth <= 850) {
+          sidebar.classList.add('collapsed');
+          sidebar.classList.remove('mobile-open');
+          mainContent.classList.add('expanded');
+          sidebarOverlay.classList.remove('show');
+          sidebarVisible = false;
+        } else {
+          sidebar.classList.remove('mobile-open');
+          sidebarOverlay.classList.remove('show');
+          if (sidebarVisible) {
+            sidebar.classList.remove('collapsed');
+            mainContent.classList.remove('expanded');
+          } else {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+          }
+        }
+      }
+
+      sidebarToggle.addEventListener('click', () => {
+        if (window.innerWidth <= 850) {
+          const isOpen = sidebar.classList.contains('mobile-open');
+          if (isOpen) {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('show');
+          } else {
+            sidebar.classList.add('mobile-open');
+            sidebarOverlay.classList.add('show');
+          }
+        } else {
+          sidebarVisible = !sidebarVisible;
+          updateSidebarState();
+        }
+      });
+
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('mobile-open');
+        sidebarOverlay.classList.remove('show');
+      });
+
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          if (window.innerWidth <= 850) {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('show');
+          }
+        });
+      });
+
+      window.addEventListener('resize', updateSidebarState);
+      updateSidebarState();
+
+      // ===== THEME TOGGLE =====
+      const savedTheme = localStorage.getItem('tinnybackend-theme');
+      if (savedTheme) {
+        html.setAttribute('data-theme', savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        html.setAttribute('data-theme', 'dark');
+      }
+
+      function updateThemeUI(theme) {
+        const icon = themeToggle.querySelector('i');
+        if (theme === 'dark') {
+          icon.classList.remove('fa-moon');
+          icon.classList.add('fa-sun');
+          hljsLight.disabled = true;
+          hljsDark.disabled = false;
+        } else {
+          icon.classList.remove('fa-sun');
+          icon.classList.add('fa-moon');
+          hljsLight.disabled = false;
+          hljsDark.disabled = true;
+        }
+      }
+
+      updateThemeUI(html.getAttribute('data-theme'));
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('tinnybackend-theme', newTheme);
+        updateThemeUI(newTheme);
+      });
+
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          if (!localStorage.getItem('tinnybackend-theme')) {
+            const newTheme = e.matches ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            updateThemeUI(newTheme);
+          }
+        });
+      }
+
+      // ===== NAVIGATION =====
+      const sections = {
+        overview: document.getElementById('overview'),
+        server: document.getElementById('server'),
+        routing: document.getElementById('routing'),
+        middleware: document.getElementById('middleware'),
+        files: document.getElementById('files'),
+        monitor: document.getElementById('monitor'),
+        types: document.getElementById('types')
+      };
+
+      function switchSection(sectionId) {
+        Object.values(sections).forEach(section => {
+          if (section) {
+            section.classList.add('hidden-section');
+            section.classList.remove('section');
+          }
+        });
+        const activeSection = sections[sectionId];
+        if (activeSection) {
+          activeSection.classList.remove('hidden-section');
+          activeSection.classList.add('section');
+        }
+        navItems.forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.dataset.section === sectionId) {
+            btn.classList.add('active');
+          }
+        });
+      }
+
+      navItems.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const section = e.currentTarget.dataset.section;
+          if (section) switchSection(section);
+        });
+      });
+
+      switchSection('overview');
+
+      // ===== SYNTAX HIGHLIGHTING =====
+      document.querySelectorAll('.code-block').forEach(block => {
+        if (!block.querySelector('pre')) {
+          const content = block.innerHTML.trim();
+          block.innerHTML = `<pre><code class="language-javascript">${content}</code></pre>`;
+        }
+        hljs.highlightElement(block.querySelector('code'));
+      });
+    })();
+  </script>
 </body>
 </html>
