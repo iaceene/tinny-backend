@@ -15,6 +15,7 @@
     "nodemon": "^3.1.14"
   },
   "dependencies": {
+    "node": "file:../../../../types",
     "ws": "^8.21.0"
   }
 }

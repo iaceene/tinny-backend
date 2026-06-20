@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>404 | Page Not Found</title>
+<title>401 | Unauthorized</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -27,10 +27,10 @@ body{
 
 .container{
     width:100%;
-    max-width:800px;
+    max-width:850px;
 }
 
-.error-card{
+.auth-card{
     background:#21242b;
     border:1px solid #32363f;
     border-radius:1.5rem;
@@ -39,9 +39,9 @@ body{
     box-shadow:0 12px 28px rgba(0,0,0,.45);
 }
 
-.error-icon{
-    width:110px;
-    height:110px;
+.auth-icon{
+    width:120px;
+    height:120px;
     margin:0 auto 1.5rem;
     border-radius:50%;
     background:#252830;
@@ -51,33 +51,32 @@ body{
     justify-content:center;
 }
 
-.error-icon i{
-    font-size:3rem;
+.auth-icon i{
+    font-size:3.25rem;
     color:#6d8ecc;
 }
 
-.error-code{
+.code{
     font-size:5rem;
     font-weight:700;
-    line-height:1;
-    letter-spacing:-3px;
     color:#d4d9e2;
+    letter-spacing:-3px;
+    line-height:1;
     margin-bottom:.75rem;
 }
 
-.error-title{
+.title{
     font-size:1.8rem;
     font-weight:500;
     color:#d4d9e2;
     margin-bottom:.75rem;
 }
 
-.error-description{
-    color:#8f96a8;
-    font-size:1rem;
-    line-height:1.7;
-    max-width:520px;
+.description{
+    max-width:550px;
     margin:0 auto 2rem;
+    color:#8f96a8;
+    line-height:1.7;
 }
 
 .actions{
@@ -93,7 +92,7 @@ body{
     border-radius:999px;
     font-size:.9rem;
     font-weight:500;
-    transition:.2s ease;
+    transition:.2s;
     display:flex;
     align-items:center;
     gap:.6rem;
@@ -101,7 +100,7 @@ body{
 
 .btn-primary{
     background:#6d8ecc;
-    color:white;
+    color:#fff;
 }
 
 .btn-primary:hover{
@@ -119,12 +118,11 @@ body{
 }
 
 .terminal{
-    margin-top:1.5rem;
+    margin-top:2rem;
     background:#16181d;
     border:1px solid #2d313a;
     border-radius:1rem;
     overflow:hidden;
-    text-align:left;
 }
 
 .terminal-header{
@@ -154,34 +152,39 @@ body{
 
 .terminal-body{
     padding:1rem;
+    text-align:left;
     font-family:'Fira Code','Courier New',monospace;
-    color:#cfd8e8;
     font-size:.85rem;
+    color:#cfd8e8;
 }
 
 .line{
-    margin-bottom:.45rem;
+    margin-bottom:.5rem;
 }
 
 .prompt{
     color:#6d8ecc;
 }
 
-.path{
-    color:#f56565;
+.error{
+    color:#fc8181;
+}
+
+.success{
+    color:#68d391;
 }
 
 @media(max-width:600px){
 
-    .error-card{
+    .auth-card{
         padding:2rem 1.5rem;
     }
 
-    .error-code{
+    .code{
         font-size:4rem;
     }
 
-    .error-title{
+    .title{
         font-size:1.4rem;
     }
 }
@@ -192,30 +195,26 @@ body{
 
 <div class="container">
 
-    <div class="error-card">
+    <div class="auth-card">
 
-        <div class="error-icon">
-            <i class="fas fa-cube"></i>
+        <div class="auth-icon">
+            <i class="fas fa-lock"></i>
         </div>
 
-        <div class="error-code">404</div>
+        <div class="code">401</div>
 
-        <h1 class="error-title">Page Not Found</h1>
+        <h1 class="title">Unauthorized Access</h1>
 
-        <p class="error-description">
-            The page you requested could not be found.
-            It may have been moved, deleted, or the URL may be incorrect.
+        <p class="description">
+            You are not authorized to access this resource.
+            Please authenticate with valid credentials or contact
+            your administrator if you believe this is an error.
         </p>
 
         <div class="actions">
             <a href="/" class="btn btn-primary">
-                <i class="fas fa-house"></i>
-                Return Home
-            </a>
-
-            <a href="javascript:history.back()" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                Go Back
+                <i class="fas fa-right-to-bracket"></i>
+                Sign In
             </a>
         </div>
 
@@ -224,29 +223,33 @@ body{
                 <span class="dot red"></span>
                 <span class="dot yellow"></span>
                 <span class="dot green"></span>
-                <span class="terminal-title">system.log</span>
+                <span class="terminal-title">auth.log</span>
             </div>
 
             <div class="terminal-body">
                 <div class="line">
                     <span class="prompt">❯</span>
-                    GET
-                    <span class="path">/requested-page</span>
+                    Authentication required
                 </div>
 
                 <div class="line">
                     <span class="prompt">❯</span>
-                    Status: 404 Not Found
+                    Requested resource protected
+                </div>
+
+                <div class="line error">
+                    <span class="prompt">❯</span>
+                    Access denied (401)
                 </div>
 
                 <div class="line">
                     <span class="prompt">❯</span>
-                    Resource does not exist
+                    Session token missing or invalid
                 </div>
 
-                <div class="line">
+                <div class="line success">
                     <span class="prompt">❯</span>
-                    Redirect user to a valid route
+                    Awaiting authentication...
                 </div>
             </div>
         </div>

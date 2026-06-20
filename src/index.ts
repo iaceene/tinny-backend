@@ -1,8 +1,8 @@
-import Server, { type ServerReq, type ServerRes, type AddOption } from "./server.js";
+import Server, { type ServerReq, type ServerRes, type AddOption, type ServerOptions, type LoginOpt } from "./server.js";
 
 
 
-const srv = new Server({})
+const srv = new Server({port: 3000})
 
 srv.add({
     method: "GET",

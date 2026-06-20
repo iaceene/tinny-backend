@@ -42,7 +42,8 @@ export type Cookie = {
 export type ServerOptions = {
     port?: number,
     hostname?: string,
-    reqPerMinute?: number
+    reqPerMinute?: number,
+    DefaultHandler?: HandlerFun
 }
 
 export type ServerReq = http.IncomingMessage & {
@@ -95,9 +96,6 @@ export type Session = {
     banInterval: number
 }
 
-function defaultHandler(req: ServerReq, res: ServerRes){
-    res.send(404, {status: 404, message: `${req.method} https://${req.server.getHost()}${req.url} not found`})
-}
 
 export default class Server {
     private PORT: number
@@ -109,6 +107,7 @@ export default class Server {
     private uptime: number
     private reqCount: number
     private logs: Logs[]
+    private defaultHandler: HandlerFun
 
     private generateKey(): string{
         return randomBytes(16).toString('hex')
@@ -193,7 +192,7 @@ export default class Server {
                     method: "GET",
                     path: `/${path.dirname(prefix)}`,
                     handler: (req: ServerReq, res: ServerRes)=>{
-                        this.SendFile(res, filename)
+                        this.SendFile(res, filename, 200)
                         return
                     }
                     }) 
@@ -203,7 +202,7 @@ export default class Server {
                 method: "GET",
                 path: `/${prefix}`,
                 handler: (req: ServerReq, res: ServerRes)=>{
-                    this.SendFile(res, filename)
+                    this.SendFile(res, filename, 200)
                     return
                 }
             })
@@ -211,7 +210,7 @@ export default class Server {
 
     }
 
-    SendFile(res: ServerRes, FILE: string){
+    SendFile(res: ServerRes, FILE: string, status: number){
         const __filename = fileURLToPath(import.meta.url);
         const projectRoot = path.resolve(__filename, '..', '..');
         const __dirname = projectRoot;
@@ -229,18 +228,20 @@ export default class Server {
         fs.access(filePath, fs.constants.F_OK, (err) => {
         if (err) {
             const errorPagePath = path.join(__dirname, 'public', '404.html');
+            res.server.log(`cannot found this ${FILE}, to send ${res.socket?.localAddress}`, "error")
             res.sendFile(404, 'text/html', {
                 PATH: errorPagePath
             })
-        } else 
-            res.sendFile(200, contentType, {
+        } else
+            res.server.log(`sending file ${FILE} to ${res.socket?.localAddress}`, (status == 404 || status == 401) ? "error" : "message")
+            res.sendFile(status, contentType, {
                 PATH : filePath
             })
     });
     }
 
     log(message: string, type?: "error" | "message"){
-        if (this.logs.length > 20)
+        if (this.logs.length > 100)
             this.logs.shift()
         this.logs.push({
                             message,
@@ -258,6 +259,9 @@ export default class Server {
         this.uptime = Date.now()
         this.reqCount = 0
         this.logs = []
+        this.defaultHandler = args.DefaultHandler ?? ((req: ServerReq, res: ServerRes)=> {
+                this.SendFile(res, "public/404.html", 404);
+            })
 
 
         this.server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse)=>{
@@ -270,6 +274,7 @@ export default class Server {
             
             
             (res as ServerRes).isClosed = false;
+
 
            
             (res as ServerRes).getCookie = (name: string): Cookie | null => {
@@ -328,7 +333,6 @@ export default class Server {
                         const headerObj: any = { 'Content-Type': 'application/json', ...headers };
                         if (cookies.length > 0)
                             headerObj['Set-Cookie'] = cookies;
-                        console.log(headerObj)
                         res.writeHead(status, headerObj);
                         res.end(data ? JSON.stringify(data) : "");
                         (res as ServerRes).isClosed = true;
@@ -340,6 +344,8 @@ export default class Server {
                 (res as ServerRes).sendFile = (status: number, ContentType: string, data?: any, headers?: Headers)=>{
                     if (!(res as ServerRes).isClosed){
                         fs.readFile(data.PATH, (err, fileData) => {
+                            if ((res as ServerRes).isClosed)
+                                return
                             if (err) {
                                 res.writeHead(500, { 'Content-Type': 'text/plain' });
                                 res.end('500 - Internal Error or File Not Found');
@@ -374,8 +380,9 @@ export default class Server {
                         handlersCount++
                     }
                 }
-                if (!handlersCount)
-                    defaultHandler((req as ServerReq), (res as ServerRes))
+                if (!handlersCount){
+                    this.defaultHandler((req as ServerReq), (res as ServerRes))
+                }
             })
         })
         this.server.on("connection", (socket: net.Socket)=>{
@@ -405,24 +412,29 @@ export default class Server {
         }
 
         const Auth = (req: ServerReq, res: ServerRes)=>{
-            if (!isAuthed(req, res))
-                return res.send(401, {"Error": "Access denied"})
+            if (!isAuthed(req, res)){
+                // console.log("user not authed")
+                // return server.SendFile(res, "public/401.html", 401)
+                return res.send(401, {
+                    "Error": "not authed"
+                })
+            }
         }
 
         server.add({
             method: "GET",
             handler: (req: ServerReq, res: ServerRes) =>{
                         if (isAuthed(req, res))
-                            server.SendFile(res, "public/page/index.html")
+                            server.SendFile(res, "public/page/index.html", 200)
                         else
-                            server.SendFile(res, "public/login/index.html")
+                            server.SendFile(res, "public/login/index.html", 200)
                     },
             path: "/" 
         })
         server.add({
             method: "GET",
             handler: (req: ServerReq, res: ServerRes) =>{
-                        server.SendFile(res, "public/login/css/style.css")
+                        server.SendFile(res, "public/login/css/style.css", 200)
                     },
             path: "/css/style.css" 
         })
@@ -430,7 +442,7 @@ export default class Server {
             method: "GET",
             middelWares: [Auth],
             handler: (req: ServerReq, res: ServerRes) =>{
-                        server.SendFile(res, "public/page/index.html")
+                        server.SendFile(res, "public/page/index.html", 200)
                     },
             path: "/admin" 
         })
