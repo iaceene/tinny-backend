@@ -8,7 +8,7 @@ import { readdir } from 'node:fs/promises';
 import * as os from "node:os";
 
 
-export type HandlerFun = (req: ServerReq, res: ServerRes)=>void 
+export type HandlerFun = (req: ServerReq, res: ServerRes)=>void | Promise<void>
 
 export type AddOption = {
     method: Methods,
@@ -201,8 +201,8 @@ export default class Server {
             this.add({
                 method: "GET",
                 path: `/${prefix}`,
-                handler: (req: ServerReq, res: ServerRes)=>{
-                    this.SendFile(res, filename, 200)
+                handler: async (req: ServerReq, res: ServerRes)=>{
+                    await this.SendFile(res, filename, 200)
                     return
                 }
             })
@@ -210,7 +210,7 @@ export default class Server {
 
     }
 
-    SendFile(res: ServerRes, FILE: string, status: number){
+    async SendFile(res: ServerRes, FILE: string, status: number): Promise<void>{
         const __filename = fileURLToPath(import.meta.url);
         const projectRoot = path.resolve(__filename, '..', '..');
         const __dirname = projectRoot;
@@ -225,19 +225,15 @@ export default class Server {
             '.json': 'application/json'
         };
         const contentType = (mimeTypes as any)[extName] || 'application/octet-stream';
-        fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (err) {
-            const errorPagePath = path.join(__dirname, 'public', '404.html');
-            res.server.log(`cannot found this ${FILE}, to send ${res.socket?.localAddress}`, "error")
-            res.sendFile(404, 'text/html', {
-                PATH: errorPagePath
-            })
-        } else
+        try {
+            await fs.promises.access(filePath, fs.constants.F_OK);
             res.server.log(`sending file ${FILE} to ${res.socket?.localAddress}`, (status == 404 || status == 401) ? "error" : "message")
-            res.sendFile(status, contentType, {
-                PATH : filePath
-            })
-    });
+            return res.sendFile(status, contentType, { PATH: filePath });
+        } catch {
+            const errorPagePath = path.join(__dirname, 'public', '404.html');
+            res.server.log(`cannot find ${FILE} to send to ${res.socket?.localAddress}`, "error")
+            return res.sendFile(404, 'text/html', { PATH: errorPagePath });
+        }
     }
 
     log(message: string, type?: "error" | "message"){
@@ -259,8 +255,8 @@ export default class Server {
         this.uptime = Date.now()
         this.reqCount = 0
         this.logs = []
-        this.defaultHandler = args.DefaultHandler ?? ((req: ServerReq, res: ServerRes)=> {
-                this.SendFile(res, "public/404.html", 404);
+        this.defaultHandler = args.DefaultHandler ?? ( async (req: ServerReq, res: ServerRes)=> {
+                await this.SendFile(res, "public/404.html", 404);
             })
 
 
@@ -323,7 +319,7 @@ export default class Server {
                 body += chunk.toString();
             })
 
-            req.on("end", ()=>{
+            req.on("end", async ()=>{
                 (req as ServerReq).server = this;
                 (res as ServerRes).server = this;
                 req.url = req.url === "/" ? "/" : req.url?.replace(/(?<=.)\/+$/, "");
@@ -340,17 +336,13 @@ export default class Server {
                         this.log(`Multipple replays on ${req.url}`, "error")
                     }
                 }
-
-                (res as ServerRes).sendFile = (status: number, ContentType: string, data?: any, headers?: Headers)=>{
+ 
+                (res as ServerRes).sendFile = async (status: number, ContentType: string, data?: any, headers?: Headers)=> {
                     if (!(res as ServerRes).isClosed){
-                        fs.readFile(data.PATH, (err, fileData) => {
+                        try {
+                            const fileData = await fs.promises.readFile(data.PATH);
                             if ((res as ServerRes).isClosed)
-                                return
-                            if (err) {
-                                res.writeHead(500, { 'Content-Type': 'text/plain' });
-                                res.end('500 - Internal Error or File Not Found');
                                 return;
-                            }
                             const cookies = (res as ServerRes).getAllCookies();
                             const headerObj: any = { 'Content-Type': ContentType, ...headers };
                             if (cookies.length > 0)
@@ -358,10 +350,17 @@ export default class Server {
                             res.writeHead(status, headerObj);
                             res.end(fileData);
                             (res as ServerRes).isClosed = true;
-                        });
-                    } else {
-                        this.log(`Multipple replays on ${req.url}`, "error")
+                        }
+                        catch {
+                            if ((res as ServerRes).isClosed)
+                                return;
+                            res.writeHead(500, { 'Content-Type': 'text/plain' });
+                            res.end('500 - Internal Error or File Not Found');
+                            return;
+                        }
                     }
+                    else
+                        this.log(`Multipple replays on ${req.url}`, "error");
                 }
 
                 (req as ServerReq).body = body ? JSON.parse(body) : null
@@ -370,14 +369,21 @@ export default class Server {
                     if (this.methodHandler[i]?.method == req.method 
                         && this.methodHandler[i]?.path == req.url
                     ){
-                        if (this.methodHandler[i]?.middelWares)
-                            this.methodHandler[i]?.middelWares?.forEach((middelware) => middelware((req as ServerReq), (res as ServerRes)))
-                        if (!(res as ServerRes).isClosed)
-                            this.methodHandler[i]?.handler(req, res);
-                        const nextFn = this.methodHandler[i]?.next
-                        if (typeof nextFn === "function")
-                            nextFn((req as ServerReq), (res as ServerRes))
-                        handlersCount++
+                        if (!(res as ServerRes).isClosed) {
+                            if (this.methodHandler[i]?.middelWares) {
+                                for (const middelware of this.methodHandler[i]?.middelWares ?? []) {
+                                    await middelware((req as ServerReq), (res as ServerRes));
+                                    if ((res as ServerRes).isClosed)
+                                        break;
+                                }
+                            }
+                            if (!(res as ServerRes).isClosed)
+                                await this.methodHandler[i]?.handler(req, res);
+                            const nextFn = this.methodHandler[i]?.next
+                            if (typeof nextFn === "function")
+                                await nextFn((req as ServerReq), (res as ServerRes))
+                            handlersCount++
+                        }
                     }
                 }
                 if (!handlersCount){
@@ -411,38 +417,38 @@ export default class Server {
             return true
         }
 
-        const Auth = (req: ServerReq, res: ServerRes)=>{
+        const Auth = async (req: ServerReq, res: ServerRes)=>{
             if (!isAuthed(req, res)){
                 // console.log("user not authed")
-                // return server.SendFile(res, "public/401.html", 401)
-                return res.send(401, {
-                    "Error": "not authed"
-                })
+                return await  server.SendFile(res, "public/401.html", 401)
+                // return res.send(401, {
+                //     "Error": "not authed"
+                // })
             }
         }
 
         server.add({
             method: "GET",
-            handler: (req: ServerReq, res: ServerRes) =>{
+            handler: async (req: ServerReq, res: ServerRes) =>{
                         if (isAuthed(req, res))
-                            server.SendFile(res, "public/page/index.html", 200)
+                            await server.SendFile(res, "public/page/index.html", 200)
                         else
-                            server.SendFile(res, "public/login/index.html", 200)
+                            await server.SendFile(res, "public/login/index.html", 200)
                     },
             path: "/" 
         })
         server.add({
             method: "GET",
-            handler: (req: ServerReq, res: ServerRes) =>{
-                        server.SendFile(res, "public/login/css/style.css", 200)
+            handler: async (req: ServerReq, res: ServerRes) =>{
+                        await server.SendFile(res, "public/login/css/style.css", 200)
                     },
             path: "/css/style.css" 
         })
         server.add({
             method: "GET",
             middelWares: [Auth],
-            handler: (req: ServerReq, res: ServerRes) =>{
-                        server.SendFile(res, "public/page/index.html", 200)
+            handler: async (req: ServerReq, res: ServerRes) =>{
+                        await server.SendFile(res, "public/page/index.html", 200)
                     },
             path: "/admin" 
         })
