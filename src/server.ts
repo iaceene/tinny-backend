@@ -14,7 +14,7 @@ export type AddOption = {
     method: Methods,
     path: string,
     handler: HandlerFun,
-    middelWares?: HandlerFun[],
+    middelWares?: HandlerFun[] | undefined,
     next?: HandlerFun
 }
 
@@ -175,28 +175,37 @@ export default class Server {
         return null;
     }
 
-    async servDir(DIR: string, pref: string){
-        const files = await this.readDir(DIR, pref)
+    async servDir(DIR: string, pref: string, middelWares?: HandlerFun[]){
+        let files: DirFiles | null = null
+        try {
+            files = await this.readDir(DIR, pref)
+            
+        } catch {
+            this.log("an error happens when try to server a dir", "error")
+        }
         if (!files){
             this.log("Failed to serve this dir", "error")
             return;
         }
 
+        let index = false;
         for (let i = 0; i < files.files.length; i++){
             const filename = files.files[i]?.FileName;
             const prefix = files.files[i]?.prefix;
             if (!filename || !prefix)
                 break;
-            if (path.basename(filename).startsWith("index")){
+            if (path.basename(filename).startsWith("index") && !index){
                     this.add({
-                    method: "GET",
-                    path: `/${path.dirname(prefix)}`,
-                    handler: (req: ServerReq, res: ServerRes)=>{
-                        this.SendFile(res, filename, 200)
-                        return
-                    }
+                        method: "GET",
+                        path: `/${path.dirname(prefix)}`,
+                        handler: (req: ServerReq, res: ServerRes)=>{
+                            this.SendFile(res, filename, 200)
+                            return
+                        },
+                        middelWares
                     }) 
                     this.log(`serving ${filename} as default file`)
+                    index = true;
             }
             this.add({
                 method: "GET",
@@ -204,10 +213,27 @@ export default class Server {
                 handler: async (req: ServerReq, res: ServerRes)=>{
                     await this.SendFile(res, filename, 200)
                     return
-                }
+                },
+                middelWares
             })
         }
-
+        if (!index){
+            this.add({
+                method: "GET",
+                path: `/${pref}`,
+                handler: async (req: ServerReq, res: ServerRes)=>{
+                    res.send(200, {
+                        ...files.files.map((file)=> {
+                            return {
+                                    "name" : path.basename(file.FileName),
+                                    "url": `http://${this.hostname}:${this.PORT}/${file.prefix}`
+                                }
+                        })
+                    })
+                },
+                middelWares
+            })
+        }
     }
 
     async SendFile(res: ServerRes, FILE: string, status: number): Promise<void>{
@@ -217,12 +243,17 @@ export default class Server {
         const filePath = path.join(__dirname, FILE)
         const extName = String(path.extname(filePath)).toLowerCase()
         const mimeTypes = {
+            '.txt': 'text/plain',
             '.html': 'text/html',
             '.css': 'text/css',
             '.js': 'text/javascript',
             '.png': 'image/png',
             '.jpg': 'image/jpeg',
-            '.json': 'application/json'
+            '.json': 'application/json',
+            '.mp4': 'video/mp4',
+            '.webm' : 'video/webm',
+            '.ogg' : 'video/ogg',
+            '.avi' : 'video/x-msvideo'
         };
         const contentType = (mimeTypes as any)[extName] || 'application/octet-stream';
         try {
@@ -370,7 +401,7 @@ export default class Server {
                         && this.methodHandler[i]?.path == req.url
                     ){
                         if (!(res as ServerRes).isClosed) {
-                            if (this.methodHandler[i]?.middelWares) {
+                            if (this.methodHandler[i]?.middelWares && typeof this.methodHandler[i]?.middelWares != "undefined") {
                                 for (const middelware of this.methodHandler[i]?.middelWares ?? []) {
                                     await middelware((req as ServerReq), (res as ServerRes));
                                     if ((res as ServerRes).isClosed)
@@ -419,39 +450,13 @@ export default class Server {
 
         const Auth = async (req: ServerReq, res: ServerRes)=>{
             if (!isAuthed(req, res)){
-                // console.log("user not authed")
+                if (req.url == "/")
+                    return await  server.SendFile(res, "public/login/index.html", 401)
                 return await  server.SendFile(res, "public/401.html", 401)
-                // return res.send(401, {
-                //     "Error": "not authed"
-                // })
             }
+            if (req.url == "/")
+                return await server.SendFile(res, "public/admin/index.html", 200)
         }
-
-        server.add({
-            method: "GET",
-            handler: async (req: ServerReq, res: ServerRes) =>{
-                        if (isAuthed(req, res))
-                            await server.SendFile(res, "public/page/index.html", 200)
-                        else
-                            await server.SendFile(res, "public/login/index.html", 200)
-                    },
-            path: "/" 
-        })
-        server.add({
-            method: "GET",
-            handler: async (req: ServerReq, res: ServerRes) =>{
-                        await server.SendFile(res, "public/login/css/style.css", 200)
-                    },
-            path: "/css/style.css" 
-        })
-        server.add({
-            method: "GET",
-            middelWares: [Auth],
-            handler: async (req: ServerReq, res: ServerRes) =>{
-                        await server.SendFile(res, "public/page/index.html", 200)
-                    },
-            path: "/admin" 
-        })
 
         server.add({
             method: "POST",
@@ -500,6 +505,8 @@ export default class Server {
 
         server.servDir("./public/doc", "docs")
         server.servDir("./public/imgs", "imgs")
+        server.servDir("./public/login", "/", [Auth])
+        server.servDir("./public/admin", "admin", [Auth])
 
 
         server.listen(false, ()=>{

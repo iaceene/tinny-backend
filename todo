@@ -1,1 +1,3 @@
-[ ] - changing readFile to async readFile
+[x] - changing readFile to async readFile
+[x] - rebuild next function logic
+[x] - rebuild send file logic
