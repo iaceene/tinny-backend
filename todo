@@ -1,3 +1,4 @@
 [x] - changing readFile to async readFile
-[x] - rebuild next function logic
-[x] - rebuild send file logic
+[ ] - rebuild next function logic
+[ ] - rebuild send file logic
+[ ] - paths errors in serving dirs

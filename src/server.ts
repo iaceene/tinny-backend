@@ -194,7 +194,7 @@ export default class Server {
             const prefix = files.files[i]?.prefix;
             if (!filename || !prefix)
                 break;
-            if (path.basename(filename).startsWith("index") && !index){
+            if ((path.basename(filename).startsWith("index") && path.dirname(filename) == DIR) && !index){
                     this.add({
                         method: "GET",
                         path: `/${path.dirname(prefix)}`,
