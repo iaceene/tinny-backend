@@ -1,4 +1,6 @@
 [x] - changing readFile to async readFile
+[ ] - handling url queries (important for logouting the sessions)
+[ ] - rebuilding cookies (important for sessions)
 [ ] - rebuild next function logic
 [ ] - rebuild send file logic
 [ ] - paths errors in serving dirs

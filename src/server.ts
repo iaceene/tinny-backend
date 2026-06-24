@@ -94,6 +94,15 @@ export type Session = {
     banInterval: number
 }
 
+export type AdminSessions = {
+    id: number,
+    ip: string,
+    userAgent: string,
+    creation: number,
+    isValid: boolean,
+    request: number
+}
+
 export const colors = {
     reset: '\x1b[0m',
     black: '\x1b[30m',
@@ -105,6 +114,7 @@ export const colors = {
     cyan: '\x1b[36m',
     white: '\x1b[37m',
 };
+
 
 export default class Server {
     private PORT: number
@@ -466,6 +476,7 @@ export default class Server {
         const username: string = process.env.ADMIN_USERNAME || ""
         const password: string = process.env.ADMIN_PASSWORD || ""
         const key: string = process.env.ADMIN_KEY || ""
+        const sessions: AdminSessions[] = []
 
         if (key === "" || username === "" || password === ""){
             server.log(`cannot set ${key === "" ? "ADMIN_KEY" : username === "" ? "ADMIN_USERnAME" : password === "" ? "ADMIN_PASSWORD" : ""} as empty in .env, read tinny-backend doc`, "error");
@@ -477,8 +488,10 @@ export default class Server {
             if (!TOKEN)
                 return false
             try {
-                var decoded: any = JWT.default.verify(TOKEN.value, key);
-                server.log(`ip ${decoded.ip}, date ${decoded.date}, user-agent ${decoded.userAgent}`, "message")
+                const decoded: any = JWT.default.verify(TOKEN.value, key);
+                if (typeof sessions[decoded.id] === undefined || !sessions[decoded.id]?.isValid)
+                    throw new Error("None valid token");
+                (sessions[decoded.id] as AdminSessions).request += 1;
             } catch {
                 server.log("a user try to login to admin panel using none valid token", "error")
                 return false
@@ -492,8 +505,17 @@ export default class Server {
             try {
                 if (!req.body.username || req.body.username !== username || !req.body.password || req.body.password !== password)
                     throw new Error("User has entred a none valid cridentials")
-                token = JWT.default.sign({ ip: req.socket.remoteAddress, date: new Date().toLocaleString(), userAgent: req.headers["user-agent"]}, key, { expiresIn: "1h" });
+                const SESSION_ID = sessions.length === 0 ? 0 : sessions.length + 1
+                token = JWT.default.sign({ id: SESSION_ID }, key, { expiresIn: "1h" });
                 res.addCookie("token", token)
+                sessions.push({
+                    id: SESSION_ID,
+                    isValid: true,
+                    creation: Date.now(),
+                    userAgent: req.headers["user-agent"] ?? "DEVICE",
+                    ip: req.socket.remoteAddress ?? "UNKNOWN",
+                    request: 0
+                })
                 res.send(200, "./public/admin/index.html")
             }
             catch(err: any) {
@@ -502,6 +524,27 @@ export default class Server {
                 res.send(403, {"Error" : "Access Denied"})
             }
         }
+
+        const Logout = async (req: ServerReq, res: ServerRes) => {
+            let payloud: any
+
+            const TOKEN = res.getCookie("token")
+            if (!TOKEN)
+                return server.SendFile(res, "public/login/index.html", 401)
+
+            try {
+                payloud = JWT.default.verify(TOKEN.value, key);
+                if (typeof sessions[payloud.id] === "undefined" || !sessions[payloud.id]?.isValid)
+                    throw new Error("an Error is happens");
+                (sessions[payloud.id] as AdminSessions).isValid = false
+                return await  server.SendFile(res, "public/login/index.html", 200)
+            }
+            catch(err: any) {
+                server.log(err.message, "error")
+                res.send(403, {"Error" : "Access Denied"})
+            }
+        }
+
 
         const Auth = async (req: ServerReq, res: ServerRes)=>{
             if (!isAuthed(res)){
@@ -522,6 +565,13 @@ export default class Server {
         server.add({
             method: "GET",
             middelWares: [Auth],
+            handler: Logout,
+            path: "/api/logout" 
+        })
+
+        server.add({
+            method: "GET",
+            middelWares: [Auth],
             path: "/admin/status",
             handler: async (req: ServerReq, res: ServerRes) => {
                 const now: number = Date.now()
@@ -536,6 +586,7 @@ export default class Server {
                     "Cpu" : os.cpus()[0],
                     "Connected clients" : this.sessions.length,
                     "Total requests" : this.reqCount,
+                    "sessions": sessions,
                     "logs" : this.logs
                 })
             }
