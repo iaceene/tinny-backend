@@ -2,10 +2,12 @@ import Server from "./server.js";
 
 const srv = new Server({port: 3000})
 
-console.log(`Serving this dir ${(process.env.PWD ?? ".")}/${process.argv[2] ?? ""} at http://localhost:3000`)
-
-srv.servDir(process.argv[2] ?? ".", "/")
-
-srv.listen(false, ()=>{
-
+srv.add({
+    path: "/login",
+    method: "GET",
+    handler: (req, res) => {
+        res.send(200, {data: "server is runing"})
+    }
 })
+
+srv.listen(true)

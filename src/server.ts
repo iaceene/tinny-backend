@@ -43,7 +43,8 @@ export type ServerOptions = {
     port?: number,
     hostname?: string,
     reqPerMinute?: number,
-    DefaultHandler?: HandlerFun
+    DefaultHandler?: HandlerFun,
+    ServerName?: string
 }
 
 export type ServerReq = http.IncomingMessage & {
@@ -96,6 +97,17 @@ export type Session = {
     banInterval: number
 }
 
+export const colors = {
+    reset: '\x1b[0m',
+    black: '\x1b[30m',
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+    white: '\x1b[37m',
+};
 
 export default class Server {
     private PORT: number
@@ -107,6 +119,7 @@ export default class Server {
     private uptime: number
     private reqCount: number
     private logs: Logs[]
+    private ServerName: string
     private defaultHandler: HandlerFun
 
     private generateKey(): string{
@@ -194,7 +207,10 @@ export default class Server {
             const prefix = files.files[i]?.prefix;
             if (!filename || !prefix)
                 break;
-            if ((path.basename(filename).startsWith("index") && path.dirname(filename) == DIR) && !index){
+            if ((path.basename(filename).startsWith("index") && path.dirname(filename) == DIR.replace(/\.\//g, '')) && !index){
+                    this.log(
+                        `setting ${filename} as default page for ${DIR}`
+                    )
                     this.add({
                         method: "GET",
                         path: `/${path.dirname(prefix)}`,
@@ -203,8 +219,7 @@ export default class Server {
                             return
                         },
                         middelWares
-                    }) 
-                    this.log(`serving ${filename} as default file`)
+                    })
                     index = true;
             }
             this.add({
@@ -268,12 +283,20 @@ export default class Server {
     }
 
     log(message: string, type?: "error" | "message"){
+        const DateObj = new Date();
+        const date = `${DateObj.toDateString() + " " + DateObj.toLocaleTimeString()}`
+        const newType = type ?? message;
+
+        console.log(`[${colors.green}${date}${colors.reset}]`, 
+                `[${colors.yellow}${this.ServerName}${colors.reset}] =>`, 
+                `${(type == "error" ? colors.red : colors.white)}${message}${colors.reset}`)
+
         if (this.logs.length > 100)
             this.logs.shift()
         this.logs.push({
                             message,
                             type: type ?? "message",
-                            date: new Date().toDateString()
+                            date
                         });
     }
 
@@ -286,6 +309,7 @@ export default class Server {
         this.uptime = Date.now()
         this.reqCount = 0
         this.logs = []
+        this.ServerName = args.ServerName ?? "Server"
         this.defaultHandler = args.DefaultHandler ?? ( async (req: ServerReq, res: ServerRes)=> {
                 await this.SendFile(res, "public/404.html", 404);
             })
@@ -476,9 +500,10 @@ export default class Server {
             middelWares: [Auth],
             path: "/admin/status",
             handler: async (req: ServerReq, res: ServerRes) => {
+                const now: number = Date.now()
                 res.send(200, {
                     "Machin uptime": `${Math.floor(os.uptime() / 86400)}d ${Math.floor((os.uptime() % 86400) / 3600)}h ${Math.floor((os.uptime() % 3600) / 60)}m`,
-                    "Server uptime": `${Math.floor((Date.now() - this.uptime) / 86400)}d ${Math.floor(((Date.now() - this.uptime) % 86400) / 3600)}h ${Math.floor(((Date.now() - this.uptime) % 3600) / 60)}m`,
+                    "Server uptime": `${Math.floor((now - this.uptime) / (1000 * 60 * 60 * 24)) % 60}D ${Math.floor((now - this.uptime) / (1000 * 60 * 60)) % 60}H ${Math.floor((now - this.uptime) / (1000 * 60)) % 60}M ${Math.floor((now - this.uptime) / 1000) % 60}S`,
                     "Arch" : os.arch(),
                     "Platform" : os.platform(),
                     "Memory" : `${(os.totalmem() / (1024 ** 3)).toFixed(2)} GB`,
@@ -509,16 +534,15 @@ export default class Server {
         server.servDir("./public/admin", "admin", [Auth])
 
 
-        server.listen(false, ()=>{
-            console.log(`Monitor start listening in http://${this.hostname}:${this.PORT + 1}`)
-        })
+        server.listen(false)
     }
 
     listen(enableMon?: boolean, callback?: () => void, login?: LoginOpt){
         if (enableMon)
-            this.monitor(new Server({port: this.PORT + 1}), login?.username ?? "admin", login?.password ?? "password");
+            this.monitor(new Server({port: this.PORT + 1, ServerName: "Monitor"}), login?.username ?? "admin", login?.password ?? "password");
         this.server.listen(this.PORT, callback ?? (()=>{
-            console.log(`Server start listening in http://${this.hostname}:${this.PORT}`)
+            this.log(`start listening in http://${this.hostname}:${this.PORT}`)
+            // console.log(`${this.ServerName} start listening in http://${this.hostname}:${this.PORT}`)
         }))
     }
 }
