@@ -45,6 +45,9 @@ export type ServerOptions = {
 }
 
 export type ServerReq = http.IncomingMessage & {
+    ReqUrl: URL | null,
+    Query: URLSearchParams,
+    queries: object,
     body?: any,
     server: Server
 }
@@ -165,6 +168,7 @@ export default class Server {
             middelWares: opt.middelWares,
             next: opt.next
         })
+        this.log(`Setting a handler for ${opt.method} ${this.hostname}:${this.PORT}${opt.path.replace(/(?<=.)\/+$/, "")} [${opt.path.replace(/(?<=.)\/+$/, "")}]`)
     }
 
     decorate(name: string, data: any){
@@ -210,8 +214,8 @@ export default class Server {
 
         let index = false;
         for (let i = 0; i < files.files.length; i++){
-            const filename = files.files[i]?.FileName;
-            const prefix = files.files[i]?.prefix;
+            const filename = files.files[i]?.FileName.replace(/^\/+/, "/");
+            const prefix = files.files[i]?.prefix.replace(/^\/+/, "/");
             if (!filename || !prefix)
                 break;
             if ((path.basename(filename).startsWith("index") && path.dirname(filename) == DIR.replace(/\.\//g, '')) && !index){
@@ -318,6 +322,7 @@ export default class Server {
         this.logs = []
         this.ServerName = args.ServerName ?? "Server"
         this.defaultHandler = args.DefaultHandler ?? ( async (req: ServerReq, res: ServerRes)=> {
+                this.log(`Sending defualt of this route ${req.ReqUrl?.pathname}`)
                 await this.SendFile(res, "public/404.html", 404);
             })
 
@@ -328,8 +333,21 @@ export default class Server {
             this.reqCount++;
 
 
-            this.log(`a client requested ${req.url}`);
             
+            try {
+                const NewUrl = "http://" + this.hostname + ":" + this.PORT + (req.url ?? "");
+                (req as ServerReq).ReqUrl = URL.parse(NewUrl);
+                ((req as ServerReq).ReqUrl as any).pathname = (req as ServerReq).ReqUrl?.pathname.replace(/(?<=.)\/+$/, "");
+                (req as ServerReq).Query = new URLSearchParams(((req as ServerReq).ReqUrl as any).searchParams);
+                (req as ServerReq).queries = Object.fromEntries((req as ServerReq).Query)
+            }
+            catch {
+                this.log(`Cannot parse ${req.url}`, "error");
+                ((req as ServerReq).ReqUrl as any).pathname = req.url;
+                (req as ServerReq).queries = {}
+            }
+            
+            this.log(`${req.socket.remoteAddress} requested METHOD ${req.method}, PATH ${(req as ServerReq).ReqUrl?.pathname}`);
             
             (res as ServerRes).isClosed = false;
 
@@ -384,7 +402,7 @@ export default class Server {
             req.on("end", async ()=>{
                 (req as ServerReq).server = this;
                 (res as ServerRes).server = this;
-                req.url = req.url === "/" ? "/" : req.url?.replace(/(?<=.)\/+$/, "");
+                
                 (res as ServerRes).send = (status: number, data?: any, headers?: Headers)=>{
                     if (!(res as ServerRes).isClosed){
                         const cookies = (res as ServerRes).getAllCookies();
@@ -418,6 +436,7 @@ export default class Server {
                                 return;
                             res.writeHead(500, { 'Content-Type': 'text/plain' });
                             res.end('500 - Internal Error or File Not Found');
+                            (res as ServerRes).isClosed = true;
                             return;
                         }
                     }
@@ -426,10 +445,11 @@ export default class Server {
                 }
 
                 (req as ServerReq).body = body ? JSON.parse(body) : null
+
                 let handlersCount = 0
                 for(let i = 0; i < this.methodHandler.length; i++){
                     if (this.methodHandler[i]?.method == req.method 
-                        && this.methodHandler[i]?.path == req.url
+                        && this.methodHandler[i]?.path == ((req as ServerReq).ReqUrl as any).pathname
                     ){
                         if (!(res as ServerRes).isClosed) {
                             if (this.methodHandler[i]?.middelWares && typeof this.methodHandler[i]?.middelWares != "undefined") {
@@ -560,6 +580,14 @@ export default class Server {
             method: "POST",
             handler: Login,
             path: "/api/login" 
+        })
+
+        server.add({
+            method: "GET",
+            handler: async (req, res)=>{
+                return await  server.SendFile(res, "public/login/index.html", 401)
+            },
+            path: "/" 
         })
 
         server.add({
