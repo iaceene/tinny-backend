@@ -6,6 +6,8 @@ import * as net from "net"
 import { fileURLToPath } from 'url';
 import { readdir } from 'node:fs/promises';
 import * as os from "node:os";
+import * as JWT from "jsonwebtoken"
+import * as DOTENV from "dotenv"
 
 
 export type HandlerFun = (req: ServerReq, res: ServerRes)=>void | Promise<void>
@@ -22,11 +24,6 @@ export type Logs = {
     message: string,
     type: "message" | "error",
     date: string
-}
-
-export type LoginOpt = {
-    username: string,
-    password: string
 }
 
 export type Headers = {
@@ -463,17 +460,51 @@ export default class Server {
         })
     }
 
-    monitor(server: Server, username: string, password: string){
+    monitor(server: Server){
+        DOTENV.config()
 
-        const isAuthed = (req: ServerReq, res: ServerRes): boolean =>{
-            const key = res.getCookie("adminkey")
-            if (!key || (key as any).value !== "yassine")
+        const username: string = process.env.ADMIN_USERNAME || ""
+        const password: string = process.env.ADMIN_PASSWORD || ""
+        const key: string = process.env.ADMIN_KEY || ""
+
+        if (key === "" || username === "" || password === ""){
+            server.log(`cannot set ${key === "" ? "ADMIN_KEY" : username === "" ? "ADMIN_USERnAME" : password === "" ? "ADMIN_PASSWORD" : ""} as empty in .env, read tinny-backend doc`, "error");
+            return
+        }
+        
+        const isAuthed = (res: ServerRes): boolean =>{
+            const TOKEN = res.getCookie("token")
+            if (!TOKEN)
                 return false
+            try {
+                var decoded: any = JWT.default.verify(TOKEN.value, key);
+                server.log(`ip ${decoded.ip}, date ${decoded.date}, user-agent ${decoded.userAgent}`, "message")
+            } catch {
+                server.log("a user try to login to admin panel using none valid token", "error")
+                return false
+            }
             return true
         }
 
+        const Login = async (req: ServerReq, res: ServerRes) => {
+            let token
+
+            try {
+                if (!req.body.username || req.body.username !== username || !req.body.password || req.body.password !== password)
+                    throw new Error("User has entred a none valid cridentials")
+                token = JWT.default.sign({ ip: req.socket.remoteAddress, date: new Date().toLocaleString(), userAgent: req.headers["user-agent"]}, key, { expiresIn: "1h" });
+                res.addCookie("token", token)
+                res.send(200, "./public/admin/index.html")
+            }
+            catch(err: any) {
+                server.log(err.message, "error")
+                server.log("A user entred a none valid cridentionl", "error")
+                res.send(403, {"Error" : "Access Denied"})
+            }
+        }
+
         const Auth = async (req: ServerReq, res: ServerRes)=>{
-            if (!isAuthed(req, res)){
+            if (!isAuthed(res)){
                 if (req.url == "/")
                     return await  server.SendFile(res, "public/login/index.html", 401)
                 return await  server.SendFile(res, "public/401.html", 401)
@@ -484,14 +515,7 @@ export default class Server {
 
         server.add({
             method: "POST",
-            handler: (req: ServerReq, res: ServerRes) => {
-                if (!req.body.username || req.body.username !== username || !req.body.password || req.body.password !== password){
-                        res.send(403, {"Error" : "Access Denied"})
-                        return
-                }
-                res.addCookie("adminkey", "yassine")
-                res.send(200, { "name": `${req.body.username}`, "password": `${req.body.password}` })
-            },
+            handler: Login,
             path: "/api/login" 
         })
 
@@ -537,12 +561,11 @@ export default class Server {
         server.listen(false)
     }
 
-    listen(enableMon?: boolean, callback?: () => void, login?: LoginOpt){
+    listen(enableMon?: boolean, callback?: () => void){
         if (enableMon)
-            this.monitor(new Server({port: this.PORT + 1, ServerName: "Monitor"}), login?.username ?? "admin", login?.password ?? "password");
+            this.monitor(new Server({port: this.PORT + 1, ServerName: "Monitor"}));
         this.server.listen(this.PORT, callback ?? (()=>{
             this.log(`start listening in http://${this.hostname}:${this.PORT}`)
-            // console.log(`${this.ServerName} start listening in http://${this.hostname}:${this.PORT}`)
         }))
     }
 }
