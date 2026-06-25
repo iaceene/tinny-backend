@@ -2,5 +2,6 @@
 [ ] - handling url queries (important for logouting the sessions)
 [ ] - rebuilding cookies (important for sessions)
 [ ] - rebuild next function logic
+[ ] - rebuilding url params for api's and add 
 [ ] - rebuild send file logic
 [ ] - paths errors in serving dirs
