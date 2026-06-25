@@ -533,7 +533,6 @@ export default class Server {
         const Login = async (req: ServerReq, res: ServerRes) => {
             let token
             
-
             try {
                 if (!req.body.username || req.body.username !== username || !req.body.password || req.body.password !== password)
                     throw new Error("User has entred a none valid cridentials")
@@ -589,11 +588,12 @@ export default class Server {
 
         const Auth = async (req: ServerReq, res: ServerRes)=>{
             if (!isAuthed(res)){
-                if (req.url == "/")
+                if (req.ReqUrl?.pathname == "/")
                     return await  server.SendFile(res, "public/login/index.html", 401)
                 return await  server.SendFile(res, "public/401.html", 401)
             }
-            if (req.url == "/")
+        
+            if (req.ReqUrl?.pathname == "/")
                 return await server.SendFile(res, "public/admin/index.html", 200)
         }
 
@@ -605,8 +605,9 @@ export default class Server {
 
         server.add({
             method: "GET",
+            middelWares: [Auth],
             handler: async (req, res)=>{
-                return await  server.SendFile(res, "public/login/index.html", 401)
+                return await  server.SendFile(res, "public/login/index.html", 200)
             },
             path: "/" 
         })
