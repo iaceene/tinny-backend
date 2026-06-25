@@ -63,8 +63,8 @@ export type DirFiles = {
 
 export type ServerRes = http.ServerResponse & {
     body?: any
-    send: (status: number, data?: any, headers?: Headers)=>void,
-    sendFile: (status: number, ContentType: string, data?: any, headers?: Headers)=>void,
+    send: (status: number, data?: any, headers?: object)=>void,
+    sendFile: (status: number, ContentType: string, data?: any, headers?: object)=>void,
     isClosed: boolean,
     server: Server
     coockie: (key: string, value: string)=>string
@@ -98,7 +98,7 @@ export type Session = {
 }
 
 export type AdminSessions = {
-    id: number,
+    id: string,
     ip: string,
     userAgent: string,
     creation: number,
@@ -375,10 +375,11 @@ export default class Server {
                 cookies.push({ key: name, value })
             }
 
+            // ; Path=/; SameSite=Lax
             (res as ServerRes).getAllCookies = (): string[] => {
                 const ArrayBuffer: string[] = []
                 for (let i = 0; i < cookies.length; i++)
-                    ArrayBuffer.push(`${cookies[i]?.key}=${cookies[i]?.value}; Path=/; SameSite=Lax`)
+                    ArrayBuffer.push(`${cookies[i]?.key}=${cookies[i]?.value};`)
                 return ArrayBuffer
             }
 
@@ -403,13 +404,13 @@ export default class Server {
                 (req as ServerReq).server = this;
                 (res as ServerRes).server = this;
                 
-                (res as ServerRes).send = (status: number, data?: any, headers?: Headers)=>{
+                (res as ServerRes).send = (status: number, data?: any, headers?: object)=>{
                     if (!(res as ServerRes).isClosed){
-                        const cookies = (res as ServerRes).getAllCookies();
-                        const headerObj: any = { 'Content-Type': 'application/json', ...headers };
-                        if (cookies.length > 0)
-                            headerObj['Set-Cookie'] = cookies;
-                        res.writeHead(status, headerObj);
+                        // const cookies = (res as ServerRes).getAllCookies();
+                        // const headerObj: any = { 'Content-Type': 'application/json', ...headers };
+                        // if (cookies.length > 0)
+                        //     headerObj['Set-Cookie'] = cookies;
+                        res.writeHead(status, { 'Content-Type': 'application/json', ...headers });
                         res.end(data ? JSON.stringify(data) : "");
                         (res as ServerRes).isClosed = true;
                     } else {
@@ -417,17 +418,17 @@ export default class Server {
                     }
                 }
  
-                (res as ServerRes).sendFile = async (status: number, ContentType: string, data?: any, headers?: Headers)=> {
+                (res as ServerRes).sendFile = async (status: number, ContentType: string, data?: any, headers?: object)=> {
                     if (!(res as ServerRes).isClosed){
                         try {
                             const fileData = await fs.promises.readFile(data.PATH);
                             if ((res as ServerRes).isClosed)
                                 return;
-                            const cookies = (res as ServerRes).getAllCookies();
-                            const headerObj: any = { 'Content-Type': ContentType, ...headers };
-                            if (cookies.length > 0)
-                                headerObj['Set-Cookie'] = cookies;
-                            res.writeHead(status, headerObj);
+                            // const cookies = (res as ServerRes).getAllCookies();
+                            // const headerObj: any = { 'Content-Type': ContentType, ...headers };
+                            // if (cookies.length > 0)
+                            //     headerObj['Set-Cookie'] = cookies;
+                            res.writeHead(status, { 'Content-Type': ContentType, ...headers });
                             res.end(fileData);
                             (res as ServerRes).isClosed = true;
                         }
@@ -504,14 +505,24 @@ export default class Server {
         }
         
         const isAuthed = (res: ServerRes): boolean =>{
+
             const TOKEN = res.getCookie("token")
             if (!TOKEN)
                 return false
             try {
                 const decoded: any = JWT.default.verify(TOKEN.value, key);
-                if (typeof sessions[decoded.id] === undefined || !sessions[decoded.id]?.isValid)
+                
+                if (typeof decoded.id === undefined)
                     throw new Error("None valid token");
-                (sessions[decoded.id] as AdminSessions).request += 1;
+                for (let i = 0; i < sessions.length; i++){
+                    if (sessions[i]?.id === decoded.id){
+                        if (!sessions[i]?.isValid)
+                            throw new Error("None valid token");
+                        (sessions[i] as AdminSessions).request += 1;
+                        return true
+                    }
+                }
+                throw new Error("None valid UUID");
             } catch {
                 server.log("a user try to login to admin panel using none valid token", "error")
                 return false
@@ -521,11 +532,12 @@ export default class Server {
 
         const Login = async (req: ServerReq, res: ServerRes) => {
             let token
+            
 
             try {
                 if (!req.body.username || req.body.username !== username || !req.body.password || req.body.password !== password)
                     throw new Error("User has entred a none valid cridentials")
-                const SESSION_ID = sessions.length === 0 ? 0 : sessions.length + 1
+                const SESSION_ID = crypto.randomUUID()
                 token = JWT.default.sign({ id: SESSION_ID }, key, { expiresIn: "1h" });
                 res.addCookie("token", token)
                 sessions.push({
@@ -536,7 +548,7 @@ export default class Server {
                     ip: req.socket.remoteAddress ?? "UNKNOWN",
                     request: 0
                 })
-                res.send(200, "./public/admin/index.html")
+                res.send(200, "./public/admin/index.html", { "set-cookie" : `token=${token}; Path=/; SameSite=Lax; HttpOnly` });
             }
             catch(err: any) {
                 server.log(err.message, "error")
@@ -547,6 +559,7 @@ export default class Server {
 
         const Logout = async (req: ServerReq, res: ServerRes) => {
             let payloud: any
+            
 
             const TOKEN = res.getCookie("token")
             if (!TOKEN)
@@ -554,9 +567,17 @@ export default class Server {
 
             try {
                 payloud = JWT.default.verify(TOKEN.value, key);
-                if (typeof sessions[payloud.id] === "undefined" || !sessions[payloud.id]?.isValid)
+                if (typeof payloud.id === "undefined")
                     throw new Error("an Error is happens");
-                (sessions[payloud.id] as AdminSessions).isValid = false
+                for (let i = 0; i < sessions.length; i++){
+                    if (sessions[i]?.id === payloud.id){
+                        if (!sessions[i]?.isValid)
+                            throw new Error("None valid token");
+                        (sessions[i] as AdminSessions).request += 1;
+                        (sessions[i] as AdminSessions).isValid = false;
+                        break;
+                    }
+                }
                 return await  server.SendFile(res, "public/login/index.html", 200)
             }
             catch(err: any) {
