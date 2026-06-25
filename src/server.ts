@@ -49,6 +49,7 @@ export type ServerReq = http.IncomingMessage & {
     Query: URLSearchParams,
     queries: object,
     body?: any,
+    ip: string,
     server: Server
 }
 
@@ -62,7 +63,8 @@ export type DirFiles = {
 }
 
 export type ServerRes = http.ServerResponse & {
-    body?: any
+    body?: any,
+    ip: string,
     send: (status: number, data?: any, headers?: object)=>void,
     sendFile: (status: number, ContentType: string, data?: any, headers?: object)=>void,
     isClosed: boolean,
@@ -284,11 +286,11 @@ export default class Server {
         const contentType = (mimeTypes as any)[extName] || 'application/octet-stream';
         try {
             await fs.promises.access(filePath, fs.constants.F_OK);
-            res.server.log(`sending file ${FILE} to ${res.socket?.localAddress}`, (status == 404 || status == 401) ? "error" : "message")
+            res.server.log(`sending file ${FILE} to ${res.ip }`, (status == 404 || status == 401) ? "error" : "message")
             return res.sendFile(status, contentType, { PATH: filePath });
         } catch {
             const errorPagePath = path.join(__dirname, 'public', '404.html');
-            res.server.log(`cannot find ${FILE} to send to ${res.socket?.localAddress}`, "error")
+            res.server.log(`cannot find ${FILE} to send to ${res.ip }`, "error")
             return res.sendFile(404, 'text/html', { PATH: errorPagePath });
         }
     }
@@ -331,6 +333,7 @@ export default class Server {
             let body: string = "";
             let cookies: Cookie[] = [];
             this.reqCount++;
+            
 
 
             
@@ -347,10 +350,12 @@ export default class Server {
                 (req as ServerReq).queries = {}
             }
             
-            this.log(`${req.socket.remoteAddress} requested METHOD ${req.method}, PATH ${(req as ServerReq).ReqUrl?.pathname}`);
             
             (res as ServerRes).isClosed = false;
+            (req as ServerReq).ip = req.socket.remoteAddress?.split(':').pop() ?? "DEVICE IP";
+            (res as ServerRes).ip = (req as ServerReq).ip
 
+            this.log(`${(req as ServerReq).ip} requested METHOD ${req.method}, PATH ${(req as ServerReq).ReqUrl?.pathname}`);
 
            
             (res as ServerRes).getCookie = (name: string): Cookie | null => {
@@ -406,10 +411,6 @@ export default class Server {
                 
                 (res as ServerRes).send = (status: number, data?: any, headers?: object)=>{
                     if (!(res as ServerRes).isClosed){
-                        // const cookies = (res as ServerRes).getAllCookies();
-                        // const headerObj: any = { 'Content-Type': 'application/json', ...headers };
-                        // if (cookies.length > 0)
-                        //     headerObj['Set-Cookie'] = cookies;
                         res.writeHead(status, { 'Content-Type': 'application/json', ...headers });
                         res.end(data ? JSON.stringify(data) : "");
                         (res as ServerRes).isClosed = true;
@@ -424,10 +425,6 @@ export default class Server {
                             const fileData = await fs.promises.readFile(data.PATH);
                             if ((res as ServerRes).isClosed)
                                 return;
-                            // const cookies = (res as ServerRes).getAllCookies();
-                            // const headerObj: any = { 'Content-Type': ContentType, ...headers };
-                            // if (cookies.length > 0)
-                            //     headerObj['Set-Cookie'] = cookies;
                             res.writeHead(status, { 'Content-Type': ContentType, ...headers });
                             res.end(fileData);
                             (res as ServerRes).isClosed = true;
@@ -475,12 +472,15 @@ export default class Server {
             })
         })
         this.server.on("connection", (socket: net.Socket)=>{
-            this.log(`new connention recieved ip ${socket.remoteAddress} on port ${socket.remotePort}`)
+            const IP: string = socket.remoteAddress?.replace(/^.*:/, '') ?? "INVALID IP"
+            const RPORT: number = socket.remotePort ?? this.PORT
+
+            this.log(`New connention recieved ip ${IP} on port ${RPORT}`)
             socket.on("close", (hadError: boolean)=>{
-                this.log(`client has drop the connection ${socket.remoteAddress}}`, hadError ? "error" : "message")
+                this.log(`Client has drop the connection ${IP}`, hadError ? "error" : "message")
             })
             socket.on("error", (err: Error)=>{
-                this.log(`connection failed with ${socket.remoteAddress}, cause : ${err.message}`, "error")
+                this.log(`Connection failed with ${IP}, cause : ${err.message}`, "error")
             })
         })
         this.server.on("close", ()=>{
@@ -544,7 +544,7 @@ export default class Server {
                     isValid: true,
                     creation: Date.now(),
                     userAgent: req.headers["user-agent"] ?? "DEVICE",
-                    ip: req.socket.remoteAddress ?? "UNKNOWN",
+                    ip: (req as ServerReq).ip ?? "UNKNOWN",
                     request: 0
                 })
                 res.send(200, "./public/admin/index.html", { "set-cookie" : `token=${token}; Path=/; SameSite=Lax; HttpOnly` });
@@ -637,6 +637,7 @@ export default class Server {
                     "Connected clients" : this.sessions.length,
                     "Total requests" : this.reqCount,
                     "sessions": sessions,
+                    "routes" : this.methodHandler,
                     "logs" : this.logs
                 })
             }

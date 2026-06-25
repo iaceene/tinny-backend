@@ -1,11 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Admin Dashboard | Server Status</title>
+  <link rel="shortcut icon" href="/imgs/logo.png" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
+    :root {
+      --bg: #f4f6fa;
+      --text: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --card-bg: #ffffff;
+      --card-border: #e9eef3;
+      --sidebar-bg: #f8fafc;
+      --input-bg: #f8fafc;
+      --input-border: #e2e8f0;
+      --input-focus: #2563eb;
+      --btn-bg: #2563eb;
+      --btn-hover: #1d4ed8;
+      --btn-text: #ffffff;
+      --heading: #0f172a;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+      --toggle-bg: #f1f5f9;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --error-bg: #fee2e2;
+      --error-text: #991b1b;
+      --details-bg: #f9fafc;
+      --stats-bg: #f8fafc;
+      --terminal-bg: #0f172a;
+      --terminal-text: #e2e8f0;
+      --terminal-border: #1e293b;
+      --route-hover: #eff6ff;
+      --session-hover: #f8fafc;
+      --scrollbar-track: #e2e8f0;
+      --scrollbar-thumb: #94a3b8;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1a1a1a;
+      --text: #d4d4d4;
+      --text-secondary: #a0a0a0;
+      --text-muted: #808080;
+      --border: #3a3a3a;
+      --card-bg: #2a2a2a;
+      --card-border: #3a3a3a;
+      --sidebar-bg: #222222;
+      --input-bg: #1e1e1e;
+      --input-border: #3a3a3a;
+      --input-focus: #60a5fa;
+      --btn-bg: #3b82f6;
+      --btn-hover: #2563eb;
+      --btn-text: #ffffff;
+      --heading: #e0e0e0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+      --toggle-bg: #333333;
+      --badge-bg: #2a2a2a;
+      --badge-text: #a0a0a0;
+      --success-bg: #1a3a2a;
+      --success-text: #48bb78;
+      --error-bg: #3a1a1a;
+      --error-text: #fc8181;
+      --details-bg: #2a2a2a;
+      --stats-bg: #222222;
+      --terminal-bg: #0a0a0a;
+      --terminal-text: #d4d4d4;
+      --terminal-border: #2a2a2a;
+      --route-hover: #2a2a2a;
+      --session-hover: #2a2a2a;
+      --scrollbar-track: #2a2a2a;
+      --scrollbar-thumb: #4a4a4a;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -13,20 +90,189 @@
     }
 
     body {
-      background: #1a1d23;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       padding: 2rem;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      color: #e2e6ed;
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .dashboard {
       max-width: 1440px;
       width: 100%;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+    }
+
+    /* Left Panel - Sessions */
+    .sessions-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.3rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      height: fit-content;
+      position: sticky;
+      top: 2rem;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .sessions-header {
+      background: var(--sidebar-bg);
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .sessions-header h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--heading);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .sessions-header h2 i {
+      color: var(--input-focus);
+    }
+
+    .session-count {
+      background: var(--toggle-bg);
+      padding: 0.2rem 0.7rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .sessions-list {
+      padding: 0.8rem;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .sessions-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sessions-list::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+    }
+
+    .sessions-list::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 10px;
+    }
+
+    .session-item {
+      background: var(--stats-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.8rem;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.6rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .session-item:hover {
+      border-color: var(--input-focus);
+      background: var(--session-hover);
+    }
+
+    .session-item.current-session {
+      border-color: var(--input-focus);
+      background: var(--badge-bg);
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.1);
+    }
+
+    .session-item.current-session::before {
+      content: '●';
+      color: #48bb78;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+    }
+
+    .session-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .session-id-display {
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .session-status-badge {
+      font-size: 0.6rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .session-status-badge.active {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .session-status-badge.inactive {
+      background: var(--error-bg);
+      color: var(--error-text);
+    }
+
+    .session-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .session-details span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .session-details i {
+      width: 14px;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .no-sessions {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .no-sessions i {
+      font-size: 2rem;
+      color: var(--border);
+      display: block;
+      margin-bottom: 0.8rem;
+    }
+
+    /* Right Panel - Main Content */
+    .main-content {
       display: flex;
       flex-direction: column;
       gap: 2rem;
@@ -40,31 +286,44 @@
       flex-wrap: wrap;
       gap: 1rem;
     }
+
     .title-section h1 {
-      font-weight: 500;
+      font-weight: 700;
       font-size: 1.8rem;
       letter-spacing: -0.3px;
-      color: #d4d9e2;
+      color: var(--heading);
       display: flex;
       align-items: center;
       gap: 0.6rem;
     }
+
     .title-section h1 i {
-      color: #8b9dc3;
+      color: var(--input-focus);
       font-size: 1.8rem;
     }
+
     .sub {
-      color: #7c8291;
+      color: var(--text-muted);
       font-size: 0.85rem;
       margin-top: 0.3rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-    .refresh-btn {
-      background: #252830;
-      border: 1px solid #3a3f4b;
-      color: #b9c2d9;
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .theme-toggle,
+    .refresh-btn,
+    .logout-btn {
+      background: var(--toggle-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
       padding: 0.6rem 1.3rem;
       border-radius: 2.5rem;
       font-size: 0.85rem;
@@ -75,13 +334,42 @@
       cursor: pointer;
       transition: all 0.2s ease;
       letter-spacing: 0.3px;
+      font-family: 'Inter', sans-serif;
     }
+
+    .theme-toggle {
+      padding: 0.6rem;
+      width: 42px;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover,
     .refresh-btn:hover {
-      background: #2f343d;
-      border-color: #5a6275;
-      color: #dde3f0;
+      background: var(--input-focus);
+      border-color: var(--input-focus);
+      color: white;
     }
-    .refresh-btn i {
+
+    .logout-btn {
+      background: var(--error-bg);
+      border-color: var(--error-text);
+      color: var(--error-text);
+    }
+
+    .logout-btn:hover:not(:disabled) {
+      background: var(--error-text);
+      border-color: var(--error-text);
+      color: white;
+    }
+
+    .logout-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .refresh-btn i,
+    .logout-btn i,
+    .theme-toggle i {
       font-size: 0.9rem;
     }
 
@@ -93,6 +381,7 @@
       justify-content: flex-start;
       align-items: flex-start;
     }
+
     .stat-circle-group {
       display: flex;
       flex-direction: column;
@@ -100,28 +389,33 @@
       gap: 0.6rem;
       min-width: 100px;
     }
+
     .circle-wrapper {
       position: relative;
       width: 90px;
       height: 90px;
     }
+
     .circle-svg {
       transform: rotate(-90deg);
       width: 90px;
       height: 90px;
     }
+
     .circle-bg {
       fill: none;
-      stroke: #2b2f38;
+      stroke: var(--border);
       stroke-width: 6;
     }
+
     .circle-progress {
       fill: none;
-      stroke: #6d8ecc;
+      stroke: var(--input-focus);
       stroke-width: 6;
       stroke-linecap: round;
       transition: stroke-dashoffset 0.6s ease;
     }
+
     .circle-inner {
       position: absolute;
       top: 50%;
@@ -129,69 +423,197 @@
       transform: translate(-50%, -50%);
       text-align: center;
       font-weight: 500;
-      color: #cfd7e6;
+      color: var(--text);
     }
+
     .circle-value {
       font-size: 1.25rem;
       font-weight: 600;
       line-height: 1.2;
     }
+
     .circle-unit {
       font-size: 0.7rem;
-      color: #9199ab;
+      color: var(--text-muted);
     }
+
     .stat-label {
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      color: #8f96a8;
+      color: var(--text-muted);
       font-weight: 500;
       text-align: center;
     }
+
     .stat-detail {
       font-size: 0.7rem;
-      color: #6f7686;
+      color: var(--text-muted);
       margin-top: -0.3rem;
     }
 
     /* Memory bar card */
     .memory-bar-card {
-      background: #21242b;
-      border: 1px solid #32363f;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 1.2rem;
       padding: 1.2rem 1.3rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
       min-width: 180px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+      box-shadow: var(--shadow-sm);
     }
+
     .memory-header {
       display: flex;
       justify-content: space-between;
       font-size: 0.8rem;
-      color: #9da4b8;
+      color: var(--text-secondary);
       font-weight: 500;
     }
+
     .memory-bar-bg {
-      background: #2a2e37;
+      background: var(--border);
       height: 8px;
       border-radius: 20px;
       overflow: hidden;
       width: 100%;
     }
+
     .memory-bar-fill {
-      background: #6d8ecc;
+      background: var(--input-focus);
       height: 100%;
       border-radius: 20px;
       width: 0%;
       transition: width 0.5s ease;
     }
+
     .memory-stats {
       display: flex;
       justify-content: space-between;
       font-size: 0.75rem;
-      color: #7a8193;
+      color: var(--text-muted);
+    }
+
+    /* Routes Section */
+    .routes-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.3rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .routes-header {
+      background: var(--sidebar-bg);
+      padding: 0.8rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .routes-header h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--heading);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .routes-header h3 i {
+      color: var(--input-focus);
+    }
+
+    .routes-count {
+      background: var(--toggle-bg);
+      padding: 0.15rem 0.6rem;
+      border-radius: 2rem;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .routes-grid {
+      padding: 0.8rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .route-tag {
+      background: var(--stats-bg);
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.75rem;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .route-tag:hover {
+      border-color: var(--input-focus);
+      background: var(--route-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+
+    .route-method {
+      font-weight: 700;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.3rem;
+      letter-spacing: 0.5px;
+    }
+
+    .route-method.get {
+      color: #48bb78;
+      background: rgba(72, 187, 120, 0.15);
+    }
+
+    .route-method.post {
+      color: #ecc94b;
+      background: rgba(236, 201, 75, 0.15);
+    }
+
+    .route-method.put {
+      color: #4299e1;
+      background: rgba(66, 153, 225, 0.15);
+    }
+
+    .route-method.delete {
+      color: #fc8181;
+      background: rgba(252, 129, 129, 0.15);
+    }
+
+    .route-method.patch {
+      color: #9f7aea;
+      background: rgba(159, 122, 234, 0.15);
+    }
+
+    .route-path {
+      color: var(--text);
+    }
+
+    .route-path i {
+      color: var(--text-muted);
+      font-size: 0.6rem;
+      margin: 0 0.2rem;
+    }
+
+    .no-routes {
+      padding: 1rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-align: center;
+      width: 100%;
     }
 
     /* Info cards row */
@@ -200,81 +622,113 @@
       flex-wrap: wrap;
       gap: 1rem;
     }
+
     .info-card {
-      background: #21242b;
-      border: 1px solid #32363f;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 1rem;
       padding: 0.9rem 1.3rem;
       display: flex;
       align-items: center;
       gap: 0.8rem;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
     }
+
+    .info-card:hover {
+      border-color: var(--input-focus);
+      box-shadow: var(--shadow-md);
+    }
+
     .info-card i {
-      color: #7c8db0;
+      color: var(--input-focus);
       font-size: 1.2rem;
     }
+
     .info-text {
       display: flex;
       flex-direction: column;
     }
+
     .info-label {
       font-size: 0.7rem;
       text-transform: uppercase;
-      color: #838b9c;
+      color: var(--text-muted);
     }
+
     .info-value {
       font-weight: 600;
-      color: #d4dceb;
+      color: var(--text);
     }
 
     /* Terminal logger */
     .terminal-panel {
-      background: #16181d;
-      border: 1px solid #2d313a;
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
       border-radius: 1.3rem;
       overflow: hidden;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+      box-shadow: var(--shadow-lg);
       display: flex;
       flex-direction: column;
       height: 380px;
+      transition: background 0.3s ease, border-color 0.3s ease;
     }
+
     .terminal-header {
-      background: #1e2128;
+      background: var(--sidebar-bg);
       padding: 0.7rem 1.2rem;
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      border-bottom: 1px solid #2f333d;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s ease, border-color 0.3s ease;
     }
+
     .terminal-dot {
       width: 11px;
       height: 11px;
       border-radius: 50%;
       display: inline-block;
     }
+
     .dot-red { background: #f56565; }
     .dot-yellow { background: #ecc94b; }
     .dot-green { background: #48bb78; }
+
     .terminal-title {
       margin-left: 0.8rem;
-      color: #a0a8bb;
+      color: var(--text-muted);
       font-size: 0.8rem;
       font-weight: 500;
       letter-spacing: 0.3px;
     }
+
     .terminal-body {
       flex: 1;
       padding: 0.8rem 1rem;
       overflow-y: auto;
-      font-family: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
       font-size: 0.8rem;
-      color: #cbd5e0;
-      background: #0e1015;
+      color: var(--terminal-text);
+      background: var(--terminal-bg);
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
     }
+
+    .terminal-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .terminal-body::-webkit-scrollbar-track {
+      background: var(--terminal-border);
+    }
+
+    .terminal-body::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 10px;
+    }
+
     .terminal-line {
       display: flex;
       gap: 0.6rem;
@@ -283,26 +737,87 @@
       padding: 0.2rem 0;
       word-break: break-all;
     }
+
     .terminal-prompt {
-      color: #718096;
+      color: var(--text-muted);
       user-select: none;
     }
+
     .terminal-timestamp {
-      color: #636d83;
+      color: var(--text-muted);
       margin-right: 0.5rem;
       font-size: 0.7rem;
       white-space: nowrap;
     }
+
     .terminal-message {
-      color: #cfd8e8;
+      color: var(--terminal-text);
     }
+
     .terminal-error {
       color: #fc8181;
     }
 
+    .terminal-success {
+      color: #48bb78;
+    }
+
+    .terminal-warning {
+      color: #ecc94b;
+    }
+
     .loading-text {
-      color: #8892a8;
+      color: var(--text-muted);
       font-style: italic;
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--input-focus);
+      color: var(--text);
+      padding: 1rem 1.5rem;
+      border-radius: 0.8rem;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      animation: slideIn 0.3s ease;
+      max-width: 400px;
+    }
+
+    .notification.success { border-color: #48bb78; }
+    .notification.error { border-color: #fc8181; }
+    .notification.warning { border-color: #ecc94b; }
+    .notification i { font-size: 1.2rem; }
+    .notification.success i { color: #48bb78; }
+    .notification.error i { color: #fc8181; }
+    .notification.warning i { color: #ecc94b; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      
+      .sessions-panel {
+        position: static;
+        order: -1;
+      }
     }
 
     @media (max-width: 700px) {
@@ -312,52 +827,148 @@
       .stats-row {
         gap: 1rem;
       }
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .routes-grid {
+        gap: 0.4rem;
+      }
+      .route-tag {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.7rem;
+      }
+      .title-section h1 {
+        font-size: 1.5rem;
+      }
     }
   </style>
-  <link rel="shortcut icon" href="/imgs/no-bg-logo.png" type="image/x-icon">
 </head>
 <body>
   <div class="dashboard">
-    <div class="header">
-      <div class="title-section">
-        <h1><i class="fas fa-cube"></i> System Overview</h1>
-        <div class="sub">
-          <i class="fas fa-sync-alt fa-spin" id="loading-indicator" style="display: none;"></i>
-          <span id="last-updated">Awaiting data...</span>
+    <!-- Left Panel: Sessions -->
+    <div class="sessions-panel">
+      <div class="sessions-header">
+        <h2><i class="fas fa-users"></i> Live Sessions</h2>
+        <span class="session-count" id="session-count">0</span>
+      </div>
+      <div class="sessions-list" id="sessions-list">
+        <div class="no-sessions">
+          <i class="fas fa-user-slash"></i>
+          <p>No active sessions</p>
         </div>
       </div>
-      <button class="refresh-btn" id="refresh-btn">
-        <i class="fas fa-arrows-rotate"></i> Refresh status
-      </button>
     </div>
 
-    <!-- Circular stats + memory bar -->
-    <div class="stats-row" id="stats-row">
-      <div class="loading-text">Loading metrics...</div>
-    </div>
-
-    <!-- Additional info chips -->
-    <div class="info-cards" id="info-cards"></div>
-
-    <!-- Terminal logger -->
-    <div class="terminal-panel">
-      <div class="terminal-header">
-        <span class="terminal-dot dot-red"></span>
-        <span class="terminal-dot dot-yellow"></span>
-        <span class="terminal-dot dot-green"></span>
-        <span class="terminal-title">messages — logs (live every 2s)</span>
-        <span style="margin-left: auto; font-size:0.7rem; color:#6b7280;" id="message-count">0</span>
+    <!-- Right Panel: Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <div class="title-section">
+          <h1><i class="fas fa-cube"></i> System Overview</h1>
+          <div class="sub">
+            <i class="fas fa-sync-alt fa-spin" id="loading-indicator" style="display: none;"></i>
+            <span id="last-updated">Awaiting data...</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="logout-btn" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+          <button class="refresh-btn" id="refresh-btn">
+            <i class="fas fa-arrows-rotate"></i> Refresh
+          </button>
+          <button class="refresh-btn" id="documentation-btn">
+            <i class="fa-regular fa-newspaper"></i> Docs
+          </button>
+        </div>
       </div>
-      <div class="terminal-body" id="terminal-body">
-        <div class="terminal-line"><span class="terminal-prompt">$</span> waiting for messages...</div>
+
+      <!-- Circular stats + memory bar -->
+      <div class="stats-row" id="stats-row">
+        <div class="loading-text">Loading metrics...</div>
+      </div>
+
+      <!-- Additional info chips -->
+      <div class="info-cards" id="info-cards"></div>
+
+      <!-- Routes Section -->
+      <div class="routes-section">
+        <div class="routes-header">
+          <h3><i class="fas fa-route"></i> Registered Routes</h3>
+          <span class="routes-count" id="routes-count">0 endpoints</span>
+        </div>
+        <div class="routes-grid" id="routes-grid">
+          <div class="no-routes">No routes registered</div>
+        </div>
+      </div>
+
+      <!-- Terminal logger -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-title">messages — logs (live every 2s)</span>
+          <span style="margin-left: auto; font-size:0.7rem; color:var(--text-muted);" id="message-count">0</span>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div class="terminal-line"><span class="terminal-prompt">$</span> waiting for messages...</div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
     (function() {
+      // ===== THEME TOGGLE =====
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('themeToggle');
+      const savedTheme = localStorage.getItem('tinnybackend-theme');
+      
+      if (savedTheme) {
+        html.setAttribute('data-theme', savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        html.setAttribute('data-theme', 'dark');
+      }
+
+      function updateThemeUI(theme) {
+        const icon = themeToggle.querySelector('i');
+        if (theme === 'dark') {
+          icon.classList.remove('fa-moon');
+          icon.classList.add('fa-sun');
+        } else {
+          icon.classList.remove('fa-sun');
+          icon.classList.add('fa-moon');
+        }
+      }
+
+      updateThemeUI(html.getAttribute('data-theme'));
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('tinnybackend-theme', newTheme);
+        updateThemeUI(newTheme);
+      });
+
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          if (!localStorage.getItem('tinnybackend-theme')) {
+            const newTheme = e.matches ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            updateThemeUI(newTheme);
+          }
+        });
+      }
+
+      // ===== DASHBOARD LOGIC =====
       const STATUS_URL = '/admin/status';
       const MESSAGES_URL = '/messages';
+      const LOGOUT_URL = '/api/logout';
 
       const statsRow = document.getElementById('stats-row');
       const infoCards = document.getElementById('info-cards');
@@ -366,8 +977,13 @@
       const lastUpdatedSpan = document.getElementById('last-updated');
       const loadingIndicator = document.getElementById('loading-indicator');
       const refreshBtn = document.getElementById('refresh-btn');
+      const docsBtn = document.getElementById('documentation-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+      const sessionsList = document.getElementById('sessions-list');
+      const sessionCount = document.getElementById('session-count');
+      const routesGrid = document.getElementById('routes-grid');
+      const routesCount = document.getElementById('routes-count');
 
-      // Helper: extract numeric value from strings like "7.92 GB"
       function parseGB(str) {
         if (!str) return 0;
         const num = parseFloat(str.replace(/[^0-9.]/g, ''));
@@ -379,6 +995,99 @@
         const total = (times.user||0)+(times.nice||0)+(times.sys||0)+(times.idle||0)+(times.irq||0);
         if (total === 0) return 0;
         return parseFloat((((total - times.idle) / total) * 100).toFixed(1));
+      }
+
+      function formatTimestamp(timestamp) {
+        if (!timestamp) return 'Unknown';
+        const date = new Date(timestamp);
+        return date.toLocaleString();
+      }
+
+      function getMethodColor(method) {
+        const colors = {
+          'GET': 'get',
+          'POST': 'post',
+          'PUT': 'put',
+          'DELETE': 'delete',
+          'PATCH': 'patch'
+        };
+        return colors[method.toUpperCase()] || '';
+      }
+
+      function renderRoutes(routes) {
+        if (!routes || routes.length === 0) {
+          routesGrid.innerHTML = `<div class="no-routes">No routes registered</div>`;
+          routesCount.textContent = '0 endpoints';
+          return;
+        }
+
+        routesCount.textContent = `${routes.length} endpoints`;
+        
+        let html = '';
+        routes.forEach(route => {
+          const method = route.method || 'GET';
+          const path = route.path || '/';
+          const methodClass = getMethodColor(method);
+          
+          html += `
+            <div class="route-tag">
+              <span class="route-method ${methodClass}">${method.toUpperCase()}</span>
+              <span class="route-path">
+                <i class="fas fa-chevron-right"></i>
+                ${escapeHtml(path)}
+              </span>
+            </div>
+          `;
+        });
+
+        routesGrid.innerHTML = html;
+      }
+
+      function renderSessions(sessions) {
+        if (!sessions || sessions.length === 0) {
+          sessionsList.innerHTML = `
+            <div class="no-sessions">
+              <i class="fas fa-user-slash"></i>
+              <p>No active sessions</p>
+            </div>
+          `;
+          sessionCount.textContent = '0';
+          return;
+        }
+
+        sessionCount.textContent = sessions.length;
+        
+        let html = '';
+        sessions.forEach((session, index) => {
+          const isCurrent = session.isValid && session.id;
+          const shortId = session.id ? session.id.substring(0, 8) + '...' : 'Unknown';
+          const userAgent = session.userAgent || 'Unknown';
+          const ip = session.ip || 'Unknown';
+          const creation = session.creation ? formatTimestamp(session.creation) : 'Unknown';
+          const requestCount = session.request || 0;
+          const isValid = session.isValid !== undefined ? session.isValid : true;
+
+          html += `
+            <div class="session-item ${isCurrent ? 'current-session' : ''}">
+              <div class="session-item-header">
+                <span class="session-id-display">
+                  <i class="fas fa-fingerprint"></i> ${shortId}
+                </span>
+                <span class="session-status-badge ${isValid ? 'active' : 'inactive'}">
+                  ${isValid ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div class="session-details">
+                <span><i class="fas fa-desktop"></i> ${escapeHtml(userAgent)}</span>
+                <span><i class="fas fa-network-wired"></i> ${escapeHtml(ip)}</span>
+                <span><i class="fas fa-clock"></i> Started: ${creation}</span>
+                <span><i class="fas fa-tasks"></i> Requests: ${requestCount}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        sessionsList.innerHTML = html;
       }
 
       function renderStatus(data) {
@@ -398,8 +1107,15 @@
         const clients = data['Connected clients'] ?? 0;
         const requests = data['Total requests'] ?? 0;
 
-        // Build circular stats (CPU, memory circle, uptimes as circles)
-        const circumference = 2 * Math.PI * 38; // r=38
+        if (data.sessions) {
+          renderSessions(data.sessions);
+        }
+
+        if (data.routes) {
+          renderRoutes(data.routes);
+        }
+
+        const circumference = 2 * Math.PI * 38;
         const cpuOffset = circumference - (cpuPercent / 100) * circumference;
         const memCircleOffset = circumference - (memPercent / 100) * circumference;
 
@@ -470,12 +1186,15 @@
           <div class="info-card"><i class="fas fa-microchip"></i><div class="info-text"><span class="info-label">Architecture</span><span class="info-value">${arch} / ${platform}</span></div></div>
           <div class="info-card"><i class="fas fa-plug"></i><div class="info-text"><span class="info-label">Clients</span><span class="info-value">${clients}</span></div></div>
           <div class="info-card"><i class="fas fa-globe"></i><div class="info-text"><span class="info-label">Requests</span><span class="info-value">${requests}</span></div></div>
+          <div class="info-card"><i class="fas fa-users"></i><div class="info-text"><span class="info-label">Sessions</span><span class="info-value">${data.sessions ? data.sessions.length : 0}</span></div></div>
+          <div class="info-card"><i class="fas fa-route"></i><div class="info-text"><span class="info-label">Routes</span><span class="info-value">${data.routes ? data.routes.length : 0}</span></div></div>
         `;
 
         lastUpdatedSpan.textContent = `Updated ${new Date().toLocaleTimeString()}`;
       }
 
       function escapeHtml(text) {
+        if (!text) return 'Unknown';
         return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       }
 
@@ -484,13 +1203,16 @@
         const messageText = msg.message || '';
         const type = msg.type || 'info';
         const date = msg.date || new Date().toLocaleString();
-        const lineClass = type === 'error' ? 'terminal-error' : 'terminal-message';
+        let lineClass = 'terminal-message';
+        if (type === 'error') lineClass = 'terminal-error';
+        else if (type === 'success') lineClass = 'terminal-success';
+        else if (type === 'warning') lineClass = 'terminal-warning';
+        
         const line = document.createElement('div');
         line.className = 'terminal-line';
         line.innerHTML = `<span class="terminal-prompt">❯</span><span class="terminal-timestamp">[${escapeHtml(date)}]</span><span class="${lineClass}">${escapeHtml(messageText)}</span>`;
         terminalBody.appendChild(line);
         terminalBody.scrollTop = terminalBody.scrollHeight;
-        // Update count
         const currentCount = terminalBody.querySelectorAll('.terminal-line').length;
         messageCountSpan.textContent = `${currentCount} lines`;
       }
@@ -504,7 +1226,7 @@
           renderStatus(data);
         } catch (err) {
           console.error('Status fetch error', err);
-          statsRow.innerHTML = `<div style="color:#f87171;">Failed to load status.</div>`;
+          statsRow.innerHTML = `<div style="color:var(--error-text);">Failed to load status.</div>`;
         } finally {
           loadingIndicator.style.display = 'none';
         }
@@ -515,19 +1237,13 @@
           const res = await fetch(MESSAGES_URL);
           if (!res.ok) return;
           const data = await res.json();
-          // Expect array of messages or object with logs/messages array
           const messages = Array.isArray(data) ? data : (data.logs || data.messages || []);
           if (messages.length === 0) return;
-          // Clear terminal if needed? We'll keep appending, but avoid duplicates by clearing on first load? 
-          // Better: we maintain last fetched length. Simple approach: replace all messages every fetch to keep terminal aligned.
-          // For live terminal feel we append new ones. We'll compare length.
           const currentLines = terminalBody.querySelectorAll('.terminal-line').length;
           if (currentLines === 0 || messages.length > currentLines) {
-            // Append only new messages
             const newMessages = messages.slice(currentLines);
             newMessages.forEach(m => appendTerminalMessage(m));
           } else if (messages.length < currentLines) {
-            // reset if backend trimmed
             terminalBody.innerHTML = '';
             messages.forEach(m => appendTerminalMessage(m));
           }
@@ -536,21 +1252,93 @@
         }
       }
 
-      // Initial load
-      fetchStatus();
-      fetchMessages(); // initial messages
+      function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        let icon = 'fa-info-circle';
+        if (type === 'success') icon = 'fa-check-circle';
+        else if (type === 'error') icon = 'fa-exclamation-circle';
+        else if (type === 'warning') icon = 'fa-exclamation-triangle';
+        
+        notification.innerHTML = `
+          <i class="fas ${icon}"></i>
+          <span>${message}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
 
-      // Poll messages every 2 seconds
+      async function performLogout() {
+        try {
+          logoutBtn.disabled = true;
+          logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+          
+          const response = await fetch(LOGOUT_URL, {
+            method: 'GET',
+            credentials: 'same-origin'
+          });
+          
+          const contentType = response.headers.get('content-type');
+          
+          if (contentType && contentType.includes('text/html')) {
+            showNotification('Logged out successfully', 'success');
+            window.location.href = '/';
+            return;
+          }
+          
+          try {
+            const data = await response.json();
+            if (response.ok && data.success) {
+              showNotification('Logged out successfully', 'success');
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 1500);
+            } else {
+              showNotification(data.message || 'Logout failed', 'error');
+            }
+          } catch (jsonError) {
+            if (response.redirected) {
+              showNotification('Logged out successfully', 'success');
+              window.location.href = '/';
+            } else {
+              showNotification('Logged out successfully', 'success');
+              window.location.href = '/';
+            }
+          }
+        } catch (error) {
+          console.error('Logout error:', error);
+          showNotification('Error during logout', 'error');
+          window.location.href = '/';
+        } finally {
+          logoutBtn.disabled = false;
+          logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        }
+      }
+
+      fetchStatus();
+      fetchMessages();
+
       setInterval(fetchMessages, 2000);
+      setInterval(fetchStatus, 5000);
 
       refreshBtn.addEventListener('click', (e) => {
         e.preventDefault();
         fetchStatus();
         fetchMessages();
+        showNotification('Status refreshed', 'info');
       });
 
-      // Optional status refresh every 60s
-      setInterval(fetchStatus, 60000);
+      logoutBtn.addEventListener('click', performLogout);
+      
+      docsBtn.addEventListener('click', ()=>{
+        window.open("/docs", "_blank");
+      });
     })();
   </script>
 </body>

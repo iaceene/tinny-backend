@@ -1,262 +1,649 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>401 | Unauthorized</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    background:#1a1d23;
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:2rem;
-    color:#e2e6ed;
-}
-
-.container{
-    width:100%;
-    max-width:850px;
-}
-
-.auth-card{
-    background:#21242b;
-    border:1px solid #32363f;
-    border-radius:1.5rem;
-    padding:3rem;
-    text-align:center;
-    box-shadow:0 12px 28px rgba(0,0,0,.45);
-}
-
-.auth-icon{
-    width:120px;
-    height:120px;
-    margin:0 auto 1.5rem;
-    border-radius:50%;
-    background:#252830;
-    border:1px solid #3a3f4b;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.auth-icon i{
-    font-size:3.25rem;
-    color:#6d8ecc;
-}
-
-.code{
-    font-size:5rem;
-    font-weight:700;
-    color:#d4d9e2;
-    letter-spacing:-3px;
-    line-height:1;
-    margin-bottom:.75rem;
-}
-
-.title{
-    font-size:1.8rem;
-    font-weight:500;
-    color:#d4d9e2;
-    margin-bottom:.75rem;
-}
-
-.description{
-    max-width:550px;
-    margin:0 auto 2rem;
-    color:#8f96a8;
-    line-height:1.7;
-}
-
-.actions{
-    display:flex;
-    justify-content:center;
-    gap:1rem;
-    flex-wrap:wrap;
-}
-
-.btn{
-    text-decoration:none;
-    padding:.85rem 1.5rem;
-    border-radius:999px;
-    font-size:.9rem;
-    font-weight:500;
-    transition:.2s;
-    display:flex;
-    align-items:center;
-    gap:.6rem;
-}
-
-.btn-primary{
-    background:#6d8ecc;
-    color:#fff;
-}
-
-.btn-primary:hover{
-    background:#7b99d3;
-}
-
-.btn-secondary{
-    background:#252830;
-    border:1px solid #3a3f4b;
-    color:#c8d0e0;
-}
-
-.btn-secondary:hover{
-    background:#2f343d;
-}
-
-.terminal{
-    margin-top:2rem;
-    background:#16181d;
-    border:1px solid #2d313a;
-    border-radius:1rem;
-    overflow:hidden;
-}
-
-.terminal-header{
-    background:#1e2128;
-    padding:.8rem 1rem;
-    display:flex;
-    align-items:center;
-    gap:.5rem;
-    border-bottom:1px solid #2f333d;
-}
-
-.dot{
-    width:10px;
-    height:10px;
-    border-radius:50%;
-}
-
-.red{background:#f56565;}
-.yellow{background:#ecc94b;}
-.green{background:#48bb78;}
-
-.terminal-title{
-    margin-left:.5rem;
-    color:#9ca6bc;
-    font-size:.8rem;
-}
-
-.terminal-body{
-    padding:1rem;
-    text-align:left;
-    font-family:'Fira Code','Courier New',monospace;
-    font-size:.85rem;
-    color:#cfd8e8;
-}
-
-.line{
-    margin-bottom:.5rem;
-}
-
-.prompt{
-    color:#6d8ecc;
-}
-
-.error{
-    color:#fc8181;
-}
-
-.success{
-    color:#68d391;
-}
-
-@media(max-width:600px){
-
-    .auth-card{
-        padding:2rem 1.5rem;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>401 | Unauthorized Access</title>
+  <link rel="shortcut icon" href="/imgs/logo.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --text: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --card-bg: #ffffff;
+      --card-border: #e9eef3;
+      --input-focus: #2563eb;
+      --heading: #0f172a;
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+      --toggle-bg: #f1f5f9;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --error-bg: #fee2e2;
+      --error-text: #991b1b;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --terminal-bg: #0f172a;
+      --terminal-text: #e2e8f0;
+      --terminal-border: #1e293b;
+      --icon-bg: #f8fafc;
+      --code-color: #6d8ecc;
     }
 
-    .code{
-        font-size:4rem;
+    [data-theme="dark"] {
+      --bg: #1a1a1a;
+      --text: #d4d4d4;
+      --text-secondary: #a0a0a0;
+      --text-muted: #808080;
+      --border: #3a3a3a;
+      --card-bg: #2a2a2a;
+      --card-border: #3a3a3a;
+      --input-focus: #60a5fa;
+      --heading: #e0e0e0;
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+      --toggle-bg: #333333;
+      --badge-bg: #2a2a2a;
+      --badge-text: #a0a0a0;
+      --error-bg: #3a1a1a;
+      --error-text: #fc8181;
+      --success-bg: #1a3a2a;
+      --success-text: #48bb78;
+      --terminal-bg: #0a0a0a;
+      --terminal-text: #d4d4d4;
+      --terminal-border: #2a2a2a;
+      --icon-bg: #222222;
+      --code-color: #60a5fa;
     }
 
-    .title{
-        font-size:1.4rem;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-}
-</style>
+
+    body {
+      background: var(--bg);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.5rem;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--input-focus), var(--badge-bg));
+      opacity: 0.5;
+    }
+
+    .auth-card:hover {
+      border-color: var(--input-focus);
+      box-shadow: var(--shadow-lg), 0 0 0 1px var(--input-focus);
+    }
+
+    /* Theme Toggle */
+    .theme-toggle-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1.5rem;
+    }
+
+    .theme-toggle {
+      background: var(--toggle-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--input-focus);
+      color: white;
+      border-color: var(--input-focus);
+    }
+
+    /* Icon */
+    .auth-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      background: var(--icon-bg);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .auth-icon:hover {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 40px rgba(37, 99, 235, 0.1);
+    }
+
+    .auth-icon i {
+      font-size: 3.25rem;
+      color: var(--input-focus);
+    }
+
+    /* Code */
+    .code {
+      font-size: 5rem;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -3px;
+      line-height: 1;
+      margin-bottom: 0.75rem;
+    }
+
+    .code span {
+      background: linear-gradient(135deg, var(--input-focus), var(--badge-text));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Title */
+    .title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 0.75rem;
+    }
+
+    .title i {
+      color: var(--input-focus);
+      margin-right: 0.5rem;
+    }
+
+    /* Description */
+    .description {
+      max-width: 550px;
+      margin: 0 auto 2rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .description .badge {
+      display: inline-block;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      text-decoration: none;
+      padding: 0.85rem 2rem;
+      border-radius: 2.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: 'Inter', sans-serif;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--input-focus);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--badge-text);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--toggle-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+      transform: translateY(-2px);
+    }
+
+    /* Terminal */
+    .terminal {
+      margin-top: 0.5rem;
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: background 0.3s ease, border-color 0.3s ease;
+      text-align: left;
+    }
+
+    .terminal-header {
+      background: var(--border);
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--terminal-border);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .red { background: #f56565; }
+    .yellow { background: #ecc94b; }
+    .green { background: #48bb78; }
+
+    .terminal-title {
+      margin-left: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .terminal-body {
+      padding: 1.2rem 1.2rem;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: var(--terminal-text);
+      background: var(--terminal-bg);
+      min-height: 150px;
+    }
+
+    .line {
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+
+    .line:last-child {
+      margin-bottom: 0;
+    }
+
+    .prompt {
+      color: var(--code-color);
+      user-select: none;
+    }
+
+    .error {
+      color: #fc8181;
+    }
+
+    .success {
+      color: #48bb78;
+    }
+
+    .info {
+      color: var(--code-color);
+    }
+
+    .dim {
+      color: var(--text-muted);
+    }
+
+    .cursor-blink {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: var(--code-color);
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Decorative line */
+    .decorative-line {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .decorative-line::before,
+    .decorative-line::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+    }
+
+    .decorative-line span {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .footer a {
+      color: var(--input-focus);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .footer a:hover {
+      color: var(--badge-text);
+      text-decoration: underline;
+    }
+
+    .footer i {
+      margin: 0 0.3rem;
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      .auth-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .code {
+        font-size: 3.5rem;
+      }
+
+      .title {
+        font-size: 1.4rem;
+      }
+
+      .auth-icon {
+        width: 90px;
+        height: 90px;
+      }
+
+      .auth-icon i {
+        font-size: 2.5rem;
+      }
+
+      .btn {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.85rem;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .actions {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+
+      .terminal-body {
+        font-size: 0.75rem;
+        padding: 1rem;
+      }
+
+      .line {
+        flex-wrap: wrap;
+        gap: 0.3rem;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+  </style>
 </head>
-
 <body>
 
 <div class="container">
 
-    <div class="auth-card">
+  <div class="auth-card">
 
-        <div class="auth-icon">
-            <i class="fas fa-lock"></i>
-        </div>
-
-        <div class="code">401</div>
-
-        <h1 class="title">Unauthorized Access</h1>
-
-        <p class="description">
-            You are not authorized to access this resource.
-            Please authenticate with valid credentials or contact
-            your administrator if you believe this is an error.
-        </p>
-
-        <div class="actions">
-            <a href="/" class="btn btn-primary">
-                <i class="fas fa-right-to-bracket"></i>
-                Sign In
-            </a>
-        </div>
-
-        <div class="terminal">
-            <div class="terminal-header">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
-                <span class="terminal-title">auth.log</span>
-            </div>
-
-            <div class="terminal-body">
-                <div class="line">
-                    <span class="prompt">❯</span>
-                    Authentication required
-                </div>
-
-                <div class="line">
-                    <span class="prompt">❯</span>
-                    Requested resource protected
-                </div>
-
-                <div class="line error">
-                    <span class="prompt">❯</span>
-                    Access denied (401)
-                </div>
-
-                <div class="line">
-                    <span class="prompt">❯</span>
-                    Session token missing or invalid
-                </div>
-
-                <div class="line success">
-                    <span class="prompt">❯</span>
-                    Awaiting authentication...
-                </div>
-            </div>
-        </div>
-
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-wrapper">
+      <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
+        <i class="fas fa-moon"></i>
+      </button>
     </div>
 
+    <!-- Icon -->
+    <div class="auth-icon">
+      <i class="fas fa-lock"></i>
+    </div>
+
+    <!-- Code -->
+    <div class="code">
+      <span>401</span>
+    </div>
+
+    <!-- Title -->
+    <h1 class="title">
+      <i class="fas fa-exclamation-triangle"></i>
+      Unauthorized Access
+    </h1>
+
+    <!-- Description -->
+    <p class="description">
+      You are not authorized to access this resource.
+      Please authenticate with valid credentials or contact
+      your administrator if you believe this is an error.
+      <br><br>
+      <span class="badge"><i class="fas fa-shield-alt"></i> Access Restricted</span>
+    </p>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="/" class="btn btn-primary">
+        <i class="fas fa-right-to-bracket"></i>
+        Sign In
+      </a>
+      <a href="/docs" class="btn btn-secondary">
+        <i class="fa-regular fa-newspaper"></i>
+        Documentation
+      </a>
+    </div>
+
+    <!-- Decorative Line -->
+    <div class="decorative-line">
+      <span>authentication required</span>
+    </div>
+
+    <!-- Terminal -->
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="terminal-title"><i class="fas fa-terminal"></i> auth.log</span>
+      </div>
+
+      <div class="terminal-body">
+        <div class="line">
+          <span class="prompt">❯</span>
+          <span class="info">[INFO]</span>
+          <span>Authentication required for protected resource</span>
+        </div>
+
+        <div class="line">
+          <span class="prompt">❯</span>
+          <span class="info">[INFO]</span>
+          <span>Requested endpoint: <span class="dim">/admin/status</span></span>
+        </div>
+
+        <div class="line error">
+          <span class="prompt">❯</span>
+          <span class="error">[ERROR]</span>
+          <span>Access denied — 401 Unauthorized</span>
+        </div>
+
+        <div class="line">
+          <span class="prompt">❯</span>
+          <span class="info">[INFO]</span>
+          <span>Session token: <span class="dim">missing</span></span>
+        </div>
+
+        <div class="line success">
+          <span class="prompt">❯</span>
+          <span class="success">[READY]</span>
+          <span>Awaiting authentication... <span class="cursor-blink"></span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <i class="fas fa-lock"></i>
+      Need help? Check the
+      <a href="/docs">documentation</a>
+      <i class="fas fa-chevron-right"></i>
+      <a href="/">back to home</a>
+    </div>
+
+  </div>
+
 </div>
+
+<script>
+  (function() {
+    // ===== THEME TOGGLE =====
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('tinnybackend-theme');
+    
+    if (savedTheme) {
+      html.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      html.setAttribute('data-theme', 'dark');
+    }
+
+    function updateThemeUI(theme) {
+      const icon = themeToggle.querySelector('i');
+      if (theme === 'dark') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+      }
+    }
+
+    updateThemeUI(html.getAttribute('data-theme'));
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('tinnybackend-theme', newTheme);
+      updateThemeUI(newTheme);
+    });
+
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('tinnybackend-theme')) {
+          const newTheme = e.matches ? 'dark' : 'light';
+          html.setAttribute('data-theme', newTheme);
+          updateThemeUI(newTheme);
+        }
+      });
+    }
+
+    // ===== AUTO-REDIRECT AFTER 10 SECONDS =====
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 10000);
+
+  })();
+</script>
 
 </body>
 </html>
