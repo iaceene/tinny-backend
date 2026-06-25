@@ -50,7 +50,8 @@ export type ServerReq = http.IncomingMessage & {
     queries: object,
     body?: any,
     ip: string,
-    server: Server
+    server: Server,
+    params: Record<string, string>,
 }
 
 export type ServFiles = {
@@ -81,7 +82,9 @@ export type Methods = "POST" | "GET" | "PUT" | "DELETE"
 export type Handlers = {
     method: Methods,
     path: string,
-    handler: Function
+    paramNames: string[],
+    handler: Function,
+    regex: RegExp,
     middelWares?: HandlerFun[] | undefined
     next?: HandlerFun  | undefined
 }
@@ -163,10 +166,19 @@ export default class Server {
     }
 
     add(opt: AddOption){
+        const newPath = opt.path.replace(/(?<=.)\/+$/, "")
+        const paramNames: string[] = [];
+        const parsedPath = newPath.replace(/:([^\/]+)/g, (_, paramName) => {
+            paramNames.push(paramName);
+            return "([^/]+)";
+        });
+
         this.methodHandler.push({
             method: opt.method,
             handler: opt.handler,
-            path : opt.path.replace(/(?<=.)\/+$/, ""),
+            regex: new RegExp(`^${parsedPath}$`),
+            path : newPath,
+            paramNames,
             middelWares: opt.middelWares,
             next: opt.next
         })
@@ -446,9 +458,14 @@ export default class Server {
 
                 let handlersCount = 0
                 for(let i = 0; i < this.methodHandler.length; i++){
+                    const match = (req as ServerReq).ReqUrl?.pathname.match(this.methodHandler[i]?.regex ?? "")
                     if (this.methodHandler[i]?.method == req.method 
-                        && this.methodHandler[i]?.path == ((req as ServerReq).ReqUrl as any).pathname
+                        && match
                     ){
+                        (req as ServerReq).params = {}
+                        this.methodHandler[i]?.paramNames.forEach((name, index) => {
+                            (req as ServerReq).params[name] = match[index + 1] || "";
+                        })
                         if (!(res as ServerRes).isClosed) {
                             if (this.methodHandler[i]?.middelWares && typeof this.methodHandler[i]?.middelWares != "undefined") {
                                 for (const middelware of this.methodHandler[i]?.middelWares ?? []) {
