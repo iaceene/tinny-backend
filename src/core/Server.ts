@@ -187,8 +187,7 @@ export default class Server {
         const __filename = fileURLToPath(import.meta.url);
         const projectRoot = path.resolve(__filename, '..', '..');
         const __dirname = projectRoot;
-        const filePath = path.join(__dirname, FILE)
-        const extName = String(path.extname(filePath)).toLowerCase()
+        const extName = String(path.extname(FILE)).toLowerCase()
         const mimeTypes = {
             '.txt': 'text/plain',
             '.html': 'text/html',
@@ -204,10 +203,11 @@ export default class Server {
         };
         const contentType = (mimeTypes as any)[extName] || 'application/octet-stream';
         try {
-            await fs.promises.access(filePath, fs.constants.F_OK);
+            await fs.promises.access(`./${FILE}`, fs.constants.F_OK);
             res.server.log(`sending file ${FILE} to ${res.ip }`, (status == 404 || status == 401) ? "error" : "message")
-            return res.sendFile(status, contentType, { PATH: filePath });
-        } catch {
+            return res.sendFile(status, contentType, { PATH: `./${FILE}` });
+        } catch (err) {
+            console.log(err)
             const errorPagePath = path.join(__dirname, 'public', 'stauts/404.html');
             res.server.log(`cannot find ${FILE} to send to ${res.ip }`, "error")
             return res.sendFile(404, 'text/html', { PATH: errorPagePath });

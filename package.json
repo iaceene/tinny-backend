@@ -7,7 +7,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "scripts": {
-    "start": "nodemon ./dist/index.js"
+    "example": "node ./dist/app/index.js"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
