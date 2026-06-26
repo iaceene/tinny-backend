@@ -6,17 +6,21 @@ import type {
     ServerReq,
     ServerRes
 } from "../core/types.js"
-import Authen from "./auth.js";
 
-export default function Routes(server: Server){
+import { type auth_t} from "./auth.js";
 
-    const {username, password, sessions, key, SetUsername, SetPassword} = Authen(server)
+
+
+export default function Routes(server: Server, obj: auth_t){
+
+    const {sessions, key, SetUsername, SetPassword, GetPasswd, GetUser} = obj
+
 
     const Login = async (req: ServerReq, res: ServerRes) => {
         let token
                 
         try {
-                if (!req.body.username || req.body.username !== username || !req.body.password || req.body.password !== password)
+                if (!req.body.username || req.body.username !== GetUser() || !req.body.password || req.body.password !== GetPasswd())
                     throw new Error("User has entred a none valid cridentials")
                 const SESSION_ID = crypto.randomUUID()
                 token = JWT.default.sign({ id: SESSION_ID }, key, { expiresIn: "1h" });
@@ -82,7 +86,7 @@ export default function Routes(server: Server){
                     "Total requests" : server.getReqCount(),
                     "Currnet-session": (res as any).currentID,
                     "sessions": sessions,
-                    "routes" : server.getLogs(),
+                    "routes" : server.getMethodHandlers(),
                     "logs" : server.getLogs()
                 })
             }
@@ -90,10 +94,10 @@ export default function Routes(server: Server){
         const CheckUsername = async (req: ServerReq, res: ServerRes) => {
                 let userName = req.params.username
 
-                if (typeof username === undefined)
+                if (typeof userName === undefined)
                     return res.send(404, {"user": userName, status: "not found"})
 
-                if (userName === username)
+                if (userName === GetUser())
                     return res.send(200, {"user": userName, status: "found"})
 
                 return res.send(404, {"user": userName, status: "not found"})
@@ -103,20 +107,20 @@ export default function Routes(server: Server){
                 try {
 
                     const { userName, oldpwd, newpwd } = req.body;
-                    console.log(req.body)
+
                     if (!userName || !oldpwd || !newpwd)
                         return res.send(400, { "user": userName || 'unknown', status: 'missing fields', message: 'Username, old password, and new password are required' });
 
-                    if (userName !== username)
+                    if (userName !== GetUser())
                         return res.send(404, {"user": userName, status: 'this username not found', message: `${userName} not found` });
 
-                    if (oldpwd !== password)
+                    if (oldpwd !== GetPasswd())
                         return res.send(401, {"user": userName, status: 'password not corect', message: `Password not corect for ${userName}` });
 
                     if (newpwd.length < 8)
                         return res.send(400, { "user": userName, status: 'password must be 8 char +' });
                     
-                    if (oldpwd === newpwd || newpwd === password)
+                    if (oldpwd === newpwd || newpwd === GetPasswd())
                         return res.send(400, {"user": userName, status: 'new password must be different', message: 'New password must be different from current password' });
                     SetPassword(newpwd)
                     return res.send(200, { "user": userName, status: 'password changed', message: 'Password updated successfully'})
@@ -148,7 +152,7 @@ export default function Routes(server: Server){
                     if (!oldpwd || !newpwd)
                         return res.send(401, {status: "all field are required !"})
 
-                    if (oldpwd !== password)
+                    if (oldpwd !== GetPasswd())
                         return res.send(401, {status: "incorect password"})
 
                     if (oldpwd === newpwd)

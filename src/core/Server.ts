@@ -59,6 +59,8 @@ export default class Server {
         return this.logs
     }
 
+   
+
 
     private generateKey(): string{
         return randomBytes(16).toString('hex')

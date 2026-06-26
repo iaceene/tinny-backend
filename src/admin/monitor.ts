@@ -1,6 +1,5 @@
 import Server from "../core/Server.js";
 import type {
-    AdminSessions,
     ServerReq,
     ServerRes
 } from "../core/types.js"
@@ -8,8 +7,8 @@ import Authen from "./auth.js";
 import Routes from "./routes.js";
 
 export default function monitor(server: Server){
-        const { Auth } = Authen(server)
-        const { ChangeUser, LogoutSession, ChangePasswd, ChangePasswdAuth, CheckUsername, Status, Logout, Login } = Routes(server)
+        const {Auth, sessions, key, SetUsername, SetPassword, GetPasswd, GetUser} = Authen(server)
+        const { ChangeUser, LogoutSession, ChangePasswd, ChangePasswdAuth, CheckUsername, Status, Logout, Login } = Routes(server,  {Auth, sessions, key, SetUsername, SetPassword, GetPasswd, GetUser})
 
 
         server.add({
@@ -71,7 +70,6 @@ export default function monitor(server: Server){
             path: "/api/passwd/change",
             handler: ChangePasswd
         })
-        //
 
         server.add({
             method: "POST",

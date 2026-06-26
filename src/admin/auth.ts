@@ -1,4 +1,3 @@
-import * as os from "node:os";
 import * as JWT from "jsonwebtoken"
 import * as DOTENV from "dotenv"
 import Server from "../core/Server.js";
@@ -8,7 +7,17 @@ import type {
     ServerRes
 } from "../core/types.js"
 
-export default function Authen(server: Server){
+export type auth_t = {
+    Auth: (req: ServerReq, res: ServerRes) => Promise<void>;
+    sessions: AdminSessions[];
+    key: string;
+    SetUsername: (userName: string) => void;
+    SetPassword: (passWord: string) => void;
+    GetPasswd: () => string;
+    GetUser: () => string
+}
+
+export default function Authen(server: Server): auth_t{
     DOTENV.config()
     
     let username: string = process.env.ADMIN_USERNAME || ""
@@ -55,12 +64,22 @@ export default function Authen(server: Server){
         }
     
     const SetUsername = (userName: string)=>{
+        console.log("old pwd ", username)
         username = userName
+        console.log("new pwd ", username)
     }
 
     const SetPassword = (passWord: string)=>{
         password = passWord
     }
 
-    return {Auth, username, password, sessions, key, SetUsername, SetPassword}
+    const GetPasswd = ()=>{
+        return password
+    }
+
+    const GetUser = ()=>{
+        return username
+    }
+
+    return {Auth, sessions, key, SetUsername, SetPassword, GetPasswd, GetUser}
 }
