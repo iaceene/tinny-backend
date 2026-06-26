@@ -301,7 +301,7 @@ export default class Server {
             res.server.log(`sending file ${FILE} to ${res.ip }`, (status == 404 || status == 401) ? "error" : "message")
             return res.sendFile(status, contentType, { PATH: filePath });
         } catch {
-            const errorPagePath = path.join(__dirname, 'public', '404.html');
+            const errorPagePath = path.join(__dirname, 'public', 'stauts/404.html');
             res.server.log(`cannot find ${FILE} to send to ${res.ip }`, "error")
             return res.sendFile(404, 'text/html', { PATH: errorPagePath });
         }
@@ -337,7 +337,7 @@ export default class Server {
         this.ServerName = args.ServerName ?? "Server"
         this.defaultHandler = args.DefaultHandler ?? ( async (req: ServerReq, res: ServerRes)=> {
                 this.log(`Sending defualt of this route ${req.ReqUrl?.pathname}`)
-                await this.SendFile(res, "public/404.html", 404);
+                await this.SendFile(res, "public/status/404.html", 404);
             })
 
 
@@ -511,8 +511,8 @@ export default class Server {
     monitor(server: Server){
         DOTENV.config()
 
-        const username: string = process.env.ADMIN_USERNAME || ""
-        const password: string = process.env.ADMIN_PASSWORD || ""
+        let username: string = process.env.ADMIN_USERNAME || ""
+        let password: string = process.env.ADMIN_PASSWORD || ""
         const key: string = process.env.ADMIN_KEY || ""
         const sessions: AdminSessions[] = []
 
@@ -536,6 +536,7 @@ export default class Server {
                         if (!sessions[i]?.isValid)
                             throw new Error("None valid token");
                         (sessions[i] as AdminSessions).request += 1;
+                        (res as any).currentID = decoded.id;
                         return true
                     }
                 }
@@ -607,7 +608,7 @@ export default class Server {
             if (!isAuthed(res)){
                 if (req.ReqUrl?.pathname == "/")
                     return await  server.SendFile(res, "public/login/index.html", 401)
-                return await  server.SendFile(res, "public/401.html", 401)
+                return await  server.SendFile(res, "public/status/401.html", 401)
             }
         
             if (req.ReqUrl?.pathname == "/")
@@ -653,6 +654,7 @@ export default class Server {
                     "Cpu" : os.cpus()[0],
                     "Connected clients" : this.sessions.length,
                     "Total requests" : this.reqCount,
+                    "Currnet-session": (res as any).currentID,
                     "sessions": sessions,
                     "routes" : this.methodHandler,
                     "logs" : this.logs
@@ -668,6 +670,134 @@ export default class Server {
                 res.send(200, {
                     "logs" : this.logs
                 })
+            }
+        })
+
+        server.add({
+            method: "GET",
+            path: "/passwd",
+            handler: async (req: ServerReq, res: ServerRes) => {
+                return await this.SendFile(res, "./public/login/new-password.html", 200)
+            }
+        })
+
+        server.add({
+            method: "GET",
+            path: "/api/passwd/:username",
+            handler: async (req: ServerReq, res: ServerRes) => {
+                let userName = req.params.username
+
+                if (typeof username === undefined)
+                    return res.send(404, {"user": userName, status: "not found"})
+
+                if (userName === username)
+                    return res.send(200, {"user": userName, status: "found"})
+
+                return res.send(404, {"user": userName, status: "not found"})
+            }
+        })
+
+        server.add({
+            method: "POST",
+            path: "/api/passwd/change",
+            handler: async (req: ServerReq, res: ServerRes) => {
+                try {
+
+                    const { userName, oldpwd, newpwd } = req.body;
+                    console.log(req.body)
+                    if (!userName || !oldpwd || !newpwd)
+                        return res.send(400, { "user": userName || 'unknown', status: 'missing fields', message: 'Username, old password, and new password are required' });
+
+                    if (userName !== username)
+                        return res.send(404, {"user": userName, status: 'this username not found', message: `${userName} not found` });
+
+                    if (oldpwd !== password)
+                        return res.send(401, {"user": userName, status: 'password not corect', message: `Password not corect for ${userName}` });
+
+                    if (newpwd.length < 8)
+                        return res.send(400, { "user": userName, status: 'password must be 8 char +' });
+                    
+                    if (oldpwd === newpwd || newpwd === password)
+                        return res.send(400, {"user": userName, status: 'new password must be different', message: 'New password must be different from current password' });
+
+                    password = newpwd;
+                    return res.send(200, { "user": userName, status: 'password changed', message: 'Password updated successfully'})
+
+                } catch(error: any) {
+                    server.log(`Password change error: ${error}`, "error");
+                    return res.send(500, { "user": req.body?.username || 'unknown', status: 'error', message: 'Internal server error'});
+                }
+            }
+        })
+
+        server.add({
+            method: "POST",
+            middelWares: [Auth],
+            path: "/api/logout/:SessionId",
+            handler: async (req: ServerReq, res: ServerRes) => {
+                let SessionID = req.params.SessionId
+
+                if (typeof SessionID === undefined)
+                    return res.send(404, {status: "not found"})
+
+                for (let i = 0; i < sessions.length; i++){
+                    if (SessionID === sessions[i]?.id){
+                        (sessions[i] as any).isValid = false;
+                        return res.send(200, {status: `session ${SessionID} logouted`})
+                    }
+                }
+                return res.send(404, {status: "not found"})
+            }
+        })
+
+        server.add({
+            method: "POST",
+            middelWares: [Auth],
+            path: "/passwd/change/auth",
+            handler: async (req: ServerReq, res: ServerRes) => {
+                try {
+                    const { oldpwd, newpwd } = req.body
+                    if (!oldpwd || !newpwd)
+                        return res.send(401, {status: "all field are required !"})
+
+                    if (oldpwd !== password)
+                        return res.send(401, {status: "incorect password"})
+
+                    if (oldpwd === newpwd)
+                        return res.send(400, {status: "old pwd must be defrent from new one"})
+
+                    password = newpwd;
+                    return res.send(200, {status: "password changed with secc"})
+
+                } catch {
+                    res.send(500, {status: "internal server error"})
+                }
+                return res.send(401, {status: "?"})
+            }
+        })
+
+        server.add({
+            method: "POST",
+            middelWares: [Auth],
+            path: "/api/user/change",
+            handler: async (req: ServerReq, res: ServerRes) => {
+                try {
+                    const { userName } = req.body
+
+                    if (!userName)
+                        return res.send(401, {status: "all field are required !"})
+
+
+                    if (userName.length <= 3 || userName.length >= 20)
+                        return res.send(400, {status: "username must be between 4-19"})
+
+                    username = userName;
+                    return res.send(200, {status: "username changed with secc"})
+
+                } catch {
+                    res.send(500, {status: "internal server error"})
+                }
+                return res.send(401, {status: "?"})
             }
         })
 

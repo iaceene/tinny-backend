@@ -18,12 +18,7 @@
       --card-bg: #ffffff;
       --card-border: #e9eef3;
       --sidebar-bg: #f8fafc;
-      --input-bg: #f8fafc;
-      --input-border: #e2e8f0;
       --input-focus: #2563eb;
-      --btn-bg: #2563eb;
-      --btn-hover: #1d4ed8;
-      --btn-text: #ffffff;
       --heading: #0f172a;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
@@ -31,17 +26,22 @@
       --toggle-bg: #f1f5f9;
       --badge-bg: #dbeafe;
       --badge-text: #1e40af;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
       --error-bg: #fee2e2;
       --error-text: #991b1b;
-      --details-bg: #f9fafc;
-      --stats-bg: #f8fafc;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
       --terminal-bg: #0f172a;
       --terminal-text: #e2e8f0;
       --terminal-border: #1e293b;
-      --route-hover: #eff6ff;
-      --session-hover: #f8fafc;
+      --icon-bg: #f8fafc;
+      --code-color: #6d8ecc;
+      --path-color: #f56565;
+      --modal-overlay: rgba(0,0,0,0.5);
+      --input-bg: #f8fafc;
+      --input-border: #e2e8f0;
+      --btn-bg: #2563eb;
+      --btn-hover: #1d4ed8;
+      --btn-text: #ffffff;
       --scrollbar-track: #e2e8f0;
       --scrollbar-thumb: #94a3b8;
     }
@@ -55,12 +55,7 @@
       --card-bg: #2a2a2a;
       --card-border: #3a3a3a;
       --sidebar-bg: #222222;
-      --input-bg: #1e1e1e;
-      --input-border: #3a3a3a;
       --input-focus: #60a5fa;
-      --btn-bg: #3b82f6;
-      --btn-hover: #2563eb;
-      --btn-text: #ffffff;
       --heading: #e0e0e0;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
@@ -68,17 +63,22 @@
       --toggle-bg: #333333;
       --badge-bg: #2a2a2a;
       --badge-text: #a0a0a0;
-      --success-bg: #1a3a2a;
-      --success-text: #48bb78;
       --error-bg: #3a1a1a;
       --error-text: #fc8181;
-      --details-bg: #2a2a2a;
-      --stats-bg: #222222;
+      --success-bg: #1a3a2a;
+      --success-text: #48bb78;
       --terminal-bg: #0a0a0a;
       --terminal-text: #d4d4d4;
       --terminal-border: #2a2a2a;
-      --route-hover: #2a2a2a;
-      --session-hover: #2a2a2a;
+      --icon-bg: #222222;
+      --code-color: #60a5fa;
+      --path-color: #fc8181;
+      --modal-overlay: rgba(0,0,0,0.7);
+      --input-bg: #1e1e1e;
+      --input-border: #3a3a3a;
+      --btn-bg: #3b82f6;
+      --btn-hover: #2563eb;
+      --btn-text: #ffffff;
       --scrollbar-track: #2a2a2a;
       --scrollbar-thumb: #4a4a4a;
     }
@@ -110,7 +110,7 @@
       gap: 2rem;
     }
 
-    /* Left Panel - Sessions */
+    /* ===== LEFT PANEL - SESSIONS ===== */
     .sessions-panel {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -175,7 +175,7 @@
     }
 
     .session-item {
-      background: var(--stats-bg);
+      background: var(--icon-bg);
       border: 1px solid var(--border);
       border-radius: 0.8rem;
       padding: 0.8rem 1rem;
@@ -186,23 +186,28 @@
 
     .session-item:hover {
       border-color: var(--input-focus);
-      background: var(--session-hover);
+      background: var(--toggle-bg);
     }
 
     .session-item.current-session {
       border-color: var(--input-focus);
       background: var(--badge-bg);
       box-shadow: 0 0 20px rgba(37, 99, 235, 0.1);
+      border-left: 4px solid var(--input-focus);
     }
 
-    .session-item.current-session::before {
-      content: '●';
-      color: #48bb78;
+    .session-item.current-session::after {
+      content: '● Current';
       position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 0.8rem;
+      right: 0.8rem;
+      top: 0.8rem;
+      color: var(--input-focus);
+      font-size: 0.6rem;
+      font-weight: 600;
+      background: var(--badge-bg);
+      padding: 0.15rem 0.5rem;
+      border-radius: 1rem;
+      border: 1px solid var(--input-focus);
     }
 
     .session-item-header {
@@ -210,6 +215,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.4rem;
+      padding-right: 70px;
     }
 
     .session-id-display {
@@ -257,6 +263,37 @@
       color: var(--text-muted);
     }
 
+    .session-logout-btn {
+      position: absolute;
+      right: 0.8rem;
+      bottom: 0.8rem;
+      background: var(--error-bg);
+      border: 1px solid var(--error-text);
+      color: var(--error-text);
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.6rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      display: none;
+    }
+
+    .session-item:hover .session-logout-btn {
+      display: block;
+    }
+
+    .session-logout-btn:hover:not(:disabled) {
+      background: var(--error-text);
+      color: white;
+    }
+
+    .session-logout-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .no-sessions {
       text-align: center;
       padding: 2rem 1rem;
@@ -271,7 +308,7 @@
       margin-bottom: 0.8rem;
     }
 
-    /* Right Panel - Main Content */
+    /* ===== RIGHT PANEL ===== */
     .main-content {
       display: flex;
       flex-direction: column;
@@ -320,7 +357,8 @@
 
     .theme-toggle,
     .refresh-btn,
-    .logout-btn {
+    .logout-btn,
+    .settings-btn {
       background: var(--toggle-bg);
       border: 1px solid var(--border);
       color: var(--text);
@@ -344,7 +382,8 @@
     }
 
     .theme-toggle:hover,
-    .refresh-btn:hover {
+    .refresh-btn:hover,
+    .settings-btn:hover {
       background: var(--input-focus);
       border-color: var(--input-focus);
       color: white;
@@ -369,11 +408,12 @@
 
     .refresh-btn i,
     .logout-btn i,
-    .theme-toggle i {
+    .theme-toggle i,
+    .settings-btn i {
       font-size: 0.9rem;
     }
 
-    /* Circular stats row */
+    /* ===== STATS ROW ===== */
     .stats-row {
       display: flex;
       flex-wrap: wrap;
@@ -496,7 +536,7 @@
       color: var(--text-muted);
     }
 
-    /* Routes Section */
+    /* ===== ROUTES SECTION ===== */
     .routes-section {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -546,7 +586,7 @@
     }
 
     .route-tag {
-      background: var(--stats-bg);
+      background: var(--icon-bg);
       border: 1px solid var(--border);
       border-radius: 2rem;
       padding: 0.4rem 0.9rem;
@@ -560,7 +600,7 @@
 
     .route-tag:hover {
       border-color: var(--input-focus);
-      background: var(--route-hover);
+      background: var(--toggle-bg);
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
     }
@@ -573,30 +613,11 @@
       letter-spacing: 0.5px;
     }
 
-    .route-method.get {
-      color: #48bb78;
-      background: rgba(72, 187, 120, 0.15);
-    }
-
-    .route-method.post {
-      color: #ecc94b;
-      background: rgba(236, 201, 75, 0.15);
-    }
-
-    .route-method.put {
-      color: #4299e1;
-      background: rgba(66, 153, 225, 0.15);
-    }
-
-    .route-method.delete {
-      color: #fc8181;
-      background: rgba(252, 129, 129, 0.15);
-    }
-
-    .route-method.patch {
-      color: #9f7aea;
-      background: rgba(159, 122, 234, 0.15);
-    }
+    .route-method.get { color: #48bb78; background: rgba(72, 187, 120, 0.15); }
+    .route-method.post { color: #ecc94b; background: rgba(236, 201, 75, 0.15); }
+    .route-method.put { color: #4299e1; background: rgba(66, 153, 225, 0.15); }
+    .route-method.delete { color: #fc8181; background: rgba(252, 129, 129, 0.15); }
+    .route-method.patch { color: #9f7aea; background: rgba(159, 122, 234, 0.15); }
 
     .route-path {
       color: var(--text);
@@ -616,7 +637,7 @@
       width: 100%;
     }
 
-    /* Info cards row */
+    /* ===== INFO CARDS ===== */
     .info-cards {
       display: flex;
       flex-wrap: wrap;
@@ -633,6 +654,7 @@
       gap: 0.8rem;
       box-shadow: var(--shadow-sm);
       transition: all 0.2s ease;
+      cursor: default;
     }
 
     .info-card:hover {
@@ -661,7 +683,7 @@
       color: var(--text);
     }
 
-    /* Terminal logger */
+    /* ===== TERMINAL ===== */
     .terminal-panel {
       background: var(--terminal-bg);
       border: 1px solid var(--terminal-border);
@@ -750,28 +772,262 @@
       white-space: nowrap;
     }
 
-    .terminal-message {
-      color: var(--terminal-text);
-    }
-
-    .terminal-error {
-      color: #fc8181;
-    }
-
-    .terminal-success {
-      color: #48bb78;
-    }
-
-    .terminal-warning {
-      color: #ecc94b;
-    }
+    .terminal-message { color: var(--terminal-text); }
+    .terminal-error { color: #fc8181; }
+    .terminal-success { color: #48bb78; }
+    .terminal-warning { color: #ecc94b; }
 
     .loading-text {
       color: var(--text-muted);
       font-style: italic;
     }
 
-    /* Notification */
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--modal-overlay);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.3rem;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--heading);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .modal-header h2 i {
+      color: var(--input-focus);
+    }
+
+    .modal-close {
+      background: var(--toggle-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .modal-close:hover {
+      background: var(--error-bg);
+      border-color: var(--error-text);
+      color: var(--error-text);
+    }
+
+    .modal .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .modal .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+    }
+
+    .modal .form-group label i {
+      margin-right: 0.5rem;
+      color: var(--input-focus);
+    }
+
+    .modal .input-wrapper {
+      position: relative;
+    }
+
+    .modal .input-wrapper .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+      pointer-events: none;
+    }
+
+    .modal .input-wrapper input {
+      width: 100%;
+      padding: 0.9rem 1rem 0.9rem 2.8rem;
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--input-border);
+      border-radius: 0.8rem;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .modal .input-wrapper input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .modal .input-wrapper input:focus {
+      outline: none;
+      border-color: var(--input-focus);
+      background: var(--card-bg);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .modal .input-wrapper input:focus ~ .input-icon {
+      color: var(--input-focus);
+    }
+
+    .modal .input-wrapper input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal .btn {
+      width: 100%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 0.8rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+
+    .modal .btn-primary {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+    }
+
+    .modal .btn-primary:hover:not(:disabled) {
+      background: var(--btn-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+    }
+
+    .modal .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .modal .btn-secondary {
+      background: var(--toggle-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .modal .btn-secondary:hover {
+      background: var(--border);
+      transform: translateY(-2px);
+    }
+
+    .modal .message {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 0.8rem;
+      text-align: center;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .modal .message.show {
+      display: block;
+    }
+
+    .modal .message.success {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid var(--success-text);
+    }
+
+    .modal .message.error {
+      background: var(--error-bg);
+      color: var(--error-text);
+      border: 1px solid var(--error-text);
+    }
+
+    .modal .message.info {
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid var(--badge-text);
+    }
+
+    .modal .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    /* ===== NOTIFICATION ===== */
     .notification {
       position: fixed;
       bottom: 20px;
@@ -801,14 +1057,20 @@
 
     @keyframes slideIn {
       from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(0%); opacity: 1; }
     }
 
     @keyframes slideOut {
-      from { transform: translateX(0); opacity: 1; }
+      from { transform: translateX(0%); opacity: 1; }
       to { transform: translateX(100%); opacity: 0; }
     }
 
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 1024px) {
       .dashboard {
         grid-template-columns: 1fr;
@@ -841,12 +1103,37 @@
       .title-section h1 {
         font-size: 1.5rem;
       }
+      .modal {
+        padding: 1.5rem;
+      }
+      .modal-actions {
+        flex-direction: column;
+      }
+      .session-item-header {
+        padding-right: 0;
+      }
+      .session-item.current-session::after {
+        position: static;
+        display: inline-block;
+        margin-left: 0.5rem;
+        font-size: 0.5rem;
+        padding: 0.1rem 0.4rem;
+      }
+      .session-logout-btn {
+        position: static;
+        display: inline-block;
+        margin-top: 0.3rem;
+      }
+      .session-item:hover .session-logout-btn {
+        display: inline-block;
+      }
     }
   </style>
 </head>
 <body>
+
   <div class="dashboard">
-    <!-- Left Panel: Sessions -->
+    <!-- ===== LEFT PANEL: SESSIONS ===== -->
     <div class="sessions-panel">
       <div class="sessions-header">
         <h2><i class="fas fa-users"></i> Live Sessions</h2>
@@ -860,8 +1147,9 @@
       </div>
     </div>
 
-    <!-- Right Panel: Main Content -->
+    <!-- ===== RIGHT PANEL: MAIN CONTENT ===== -->
     <div class="main-content">
+      <!-- Header -->
       <div class="header">
         <div class="title-section">
           <h1><i class="fas fa-cube"></i> System Overview</h1>
@@ -873,6 +1161,9 @@
         <div class="header-actions">
           <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
             <i class="fas fa-moon"></i>
+          </button>
+          <button class="settings-btn" id="settingsBtn" title="Settings">
+            <i class="fas fa-cog"></i>
           </button>
           <button class="logout-btn" id="logout-btn">
             <i class="fas fa-sign-out-alt"></i> Logout
@@ -886,15 +1177,15 @@
         </div>
       </div>
 
-      <!-- Circular stats + memory bar -->
+      <!-- Stats -->
       <div class="stats-row" id="stats-row">
         <div class="loading-text">Loading metrics...</div>
       </div>
 
-      <!-- Additional info chips -->
+      <!-- Info Cards -->
       <div class="info-cards" id="info-cards"></div>
 
-      <!-- Routes Section -->
+      <!-- Routes -->
       <div class="routes-section">
         <div class="routes-header">
           <h3><i class="fas fa-route"></i> Registered Routes</h3>
@@ -905,7 +1196,7 @@
         </div>
       </div>
 
-      <!-- Terminal logger -->
+      <!-- Terminal -->
       <div class="terminal-panel">
         <div class="terminal-header">
           <span class="terminal-dot dot-red"></span>
@@ -917,6 +1208,112 @@
         <div class="terminal-body" id="terminal-body">
           <div class="terminal-line"><span class="terminal-prompt">$</span> waiting for messages...</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS MODAL ===== -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-cog"></i> Settings</h2>
+        <button class="modal-close" id="settingsModalClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Change Username -->
+      <div style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 0.9rem; color: var(--heading); margin-bottom: 0.8rem;">
+          <i class="fas fa-user-edit" style="color: var(--input-focus);"></i> Change Username
+        </h3>
+        <form id="changeUsernameForm">
+          <div class="form-group">
+            <label for="newUsername">
+              <i class="fas fa-user"></i> New Username
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="newUsername"
+                placeholder="Enter new username"
+                required
+                minlength="3"
+                maxlength="20"
+              >
+              <i class="fas fa-user input-icon"></i>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="changeUsernameBtn">
+            <i class="fas fa-save"></i>
+            <span>Update Username</span>
+          </button>
+          <div id="usernameMessage" class="message"></div>
+        </form>
+      </div>
+
+      <hr style="border-color: var(--border); margin: 1.5rem 0;">
+
+      <!-- Change Password -->
+      <div>
+        <h3 style="font-size: 0.9rem; color: var(--heading); margin-bottom: 0.8rem;">
+          <i class="fas fa-key" style="color: var(--input-focus);"></i> Change Password
+        </h3>
+        <form id="changePasswordForm">
+          <div class="form-group">
+            <label for="currentPassword">
+              <i class="fas fa-lock"></i> Current Password
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="currentPassword"
+                placeholder="Enter current password"
+                required
+              >
+              <i class="fas fa-key input-icon"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="newPassword">
+              <i class="fas fa-lock"></i> New Password
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="newPassword"
+                placeholder="Enter new password (min 8 chars)"
+                required
+                minlength="8"
+              >
+              <i class="fas fa-key input-icon"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">
+              <i class="fas fa-check-circle"></i> Confirm New Password
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm new password"
+                required
+              >
+              <i class="fas fa-check input-icon"></i>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+            <i class="fas fa-save"></i>
+            <span>Update Password</span>
+          </button>
+          <div id="passwordMessage" class="message"></div>
+        </form>
+      </div>
+
+      <div style="margin-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+        <i class="fas fa-shield-alt" style="color: var(--input-focus);"></i>
+        Changes are applied immediately
       </div>
     </div>
   </div>
@@ -965,10 +1362,12 @@
         });
       }
 
-      // ===== DASHBOARD LOGIC =====
+      // ===== DOM ELEMENTS =====
       const STATUS_URL = '/admin/status';
       const MESSAGES_URL = '/messages';
       const LOGOUT_URL = '/api/logout';
+      const CHANGE_PASSWORD_URL = '/passwd/change/auth';
+      const CHANGE_USERNAME_URL = '/api/user/change';
 
       const statsRow = document.getElementById('stats-row');
       const infoCards = document.getElementById('info-cards');
@@ -979,11 +1378,30 @@
       const refreshBtn = document.getElementById('refresh-btn');
       const docsBtn = document.getElementById('documentation-btn');
       const logoutBtn = document.getElementById('logout-btn');
+      const settingsBtn = document.getElementById('settingsBtn');
       const sessionsList = document.getElementById('sessions-list');
       const sessionCount = document.getElementById('session-count');
       const routesGrid = document.getElementById('routes-grid');
       const routesCount = document.getElementById('routes-count');
 
+      // Modal elements
+      const settingsModal = document.getElementById('settingsModal');
+      const settingsModalClose = document.getElementById('settingsModalClose');
+      const changeUsernameForm = document.getElementById('changeUsernameForm');
+      const changePasswordForm = document.getElementById('changePasswordForm');
+      const newUsernameInput = document.getElementById('newUsername');
+      const currentPasswordInput = document.getElementById('currentPassword');
+      const newPasswordInput = document.getElementById('newPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      const changeUsernameBtn = document.getElementById('changeUsernameBtn');
+      const changePasswordBtn = document.getElementById('changePasswordBtn');
+      const usernameMessage = document.getElementById('usernameMessage');
+      const passwordMessage = document.getElementById('passwordMessage');
+
+      let isRedirecting = false;
+      let currentSessionId = null;
+
+      // ===== HELPER FUNCTIONS =====
       function parseGB(str) {
         if (!str) return 0;
         const num = parseFloat(str.replace(/[^0-9.]/g, ''));
@@ -1014,6 +1432,52 @@
         return colors[method.toUpperCase()] || '';
       }
 
+      function escapeHtml(text) {
+        if (!text) return 'Unknown';
+        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      // ===== SHOW NOTIFICATION =====
+      function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        let icon = 'fa-info-circle';
+        if (type === 'success') icon = 'fa-check-circle';
+        else if (type === 'error') icon = 'fa-exclamation-circle';
+        else if (type === 'warning') icon = 'fa-exclamation-triangle';
+        
+        notification.innerHTML = `
+          <i class="fas ${icon}"></i>
+          <span>${message}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      // ===== HANDLE REDIRECT ON ERROR =====
+      function handleFetchError(error, context = '') {
+        console.error(`Fetch error (${context}):`, error);
+        
+        if (error.status === 401 || error.status === 403) {
+          showNotification('Session expired. Redirecting to login...', 'warning');
+          setTimeout(() => {
+            if (!isRedirecting) {
+              isRedirecting = true;
+              window.location.href = '/';
+            }
+          }, 1500);
+          return true;
+        }
+        return false;
+      }
+
+      // ===== RENDER FUNCTIONS =====
       function renderRoutes(routes) {
         if (!routes || routes.length === 0) {
           routesGrid.innerHTML = `<div class="no-routes">No routes registered</div>`;
@@ -1043,7 +1507,7 @@
         routesGrid.innerHTML = html;
       }
 
-      function renderSessions(sessions) {
+      function renderSessions(sessions, currentId) {
         if (!sessions || sessions.length === 0) {
           sessionsList.innerHTML = `
             <div class="no-sessions">
@@ -1058,8 +1522,8 @@
         sessionCount.textContent = sessions.length;
         
         let html = '';
-        sessions.forEach((session, index) => {
-          const isCurrent = session.isValid && session.id;
+        sessions.forEach((session) => {
+          const isCurrent = session.isValid && session.id === currentId;
           const shortId = session.id ? session.id.substring(0, 8) + '...' : 'Unknown';
           const userAgent = session.userAgent || 'Unknown';
           const ip = session.ip || 'Unknown';
@@ -1083,11 +1547,24 @@
                 <span><i class="fas fa-clock"></i> Started: ${creation}</span>
                 <span><i class="fas fa-tasks"></i> Requests: ${requestCount}</span>
               </div>
+              ${!isCurrent ? `
+                <button class="session-logout-btn" data-session-id="${session.id}">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              ` : ''}
             </div>
           `;
         });
 
         sessionsList.innerHTML = html;
+
+        // Add event listeners for session logout buttons (only for non-current sessions)
+        document.querySelectorAll('.session-logout-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const sessionId = btn.dataset.sessionId;
+            await logoutSession(sessionId, btn);
+          });
+        });
       }
 
       function renderStatus(data) {
@@ -1107,14 +1584,20 @@
         const clients = data['Connected clients'] ?? 0;
         const requests = data['Total requests'] ?? 0;
 
+        // Get current session ID from the data
+        currentSessionId = data['Currnet-session'] || null;
+
+        // Render sessions
         if (data.sessions) {
-          renderSessions(data.sessions);
+          renderSessions(data.sessions, currentSessionId);
         }
 
+        // Render routes
         if (data.routes) {
           renderRoutes(data.routes);
         }
 
+        // Build circular stats
         const circumference = 2 * Math.PI * 38;
         const cpuOffset = circumference - (cpuPercent / 100) * circumference;
         const memCircleOffset = circumference - (memPercent / 100) * circumference;
@@ -1188,16 +1671,13 @@
           <div class="info-card"><i class="fas fa-globe"></i><div class="info-text"><span class="info-label">Requests</span><span class="info-value">${requests}</span></div></div>
           <div class="info-card"><i class="fas fa-users"></i><div class="info-text"><span class="info-label">Sessions</span><span class="info-value">${data.sessions ? data.sessions.length : 0}</span></div></div>
           <div class="info-card"><i class="fas fa-route"></i><div class="info-text"><span class="info-label">Routes</span><span class="info-value">${data.routes ? data.routes.length : 0}</span></div></div>
+          ${currentSessionId ? `<div class="info-card"><i class="fas fa-fingerprint"></i><div class="info-text"><span class="info-label">Current Session</span><span class="info-value" style="font-size:0.7rem;font-family:monospace;">${currentSessionId.substring(0, 12)}...</span></div></div>` : ''}
         `;
 
         lastUpdatedSpan.textContent = `Updated ${new Date().toLocaleTimeString()}`;
       }
 
-      function escapeHtml(text) {
-        if (!text) return 'Unknown';
-        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      }
-
+      // ===== TERMINAL =====
       function appendTerminalMessage(msg) {
         if (!msg) return;
         const messageText = msg.message || '';
@@ -1217,11 +1697,18 @@
         messageCountSpan.textContent = `${currentCount} lines`;
       }
 
+      // ===== FETCH FUNCTIONS =====
       async function fetchStatus() {
         loadingIndicator.style.display = 'inline-block';
         try {
           const res = await fetch(STATUS_URL);
-          if (!res.ok) throw new Error(`Status ${res.status}`);
+          if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+              handleFetchError({ status: res.status }, 'status');
+              return;
+            }
+            throw new Error(`Status ${res.status}`);
+          }
           const data = await res.json();
           renderStatus(data);
         } catch (err) {
@@ -1235,7 +1722,13 @@
       async function fetchMessages() {
         try {
           const res = await fetch(MESSAGES_URL);
-          if (!res.ok) return;
+          if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+              handleFetchError({ status: res.status }, 'messages');
+              return;
+            }
+            return;
+          }
           const data = await res.json();
           const messages = Array.isArray(data) ? data : (data.logs || data.messages || []);
           if (messages.length === 0) return;
@@ -1252,28 +1745,38 @@
         }
       }
 
-      function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
+      // ===== SESSION LOGOUT =====
+      async function logoutSession(sessionId, button) {
+        if (!sessionId) return;
         
-        let icon = 'fa-info-circle';
-        if (type === 'success') icon = 'fa-check-circle';
-        else if (type === 'error') icon = 'fa-exclamation-circle';
-        else if (type === 'warning') icon = 'fa-exclamation-triangle';
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         
-        notification.innerHTML = `
-          <i class="fas ${icon}"></i>
-          <span>${message}</span>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-          notification.style.animation = 'slideOut 0.3s ease';
-          setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        try {
+          const response = await fetch(`/api/logout/${sessionId}`, {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+
+          if (response.ok) {
+            showNotification(`Session ${sessionId.substring(0, 8)}... logged out`, 'success');
+            await fetchStatus(); // Refresh sessions
+          } else if (response.status === 401 || response.status === 403) {
+            handleFetchError({ status: response.status }, 'session logout');
+          } else {
+            const data = await response.json();
+            showNotification(data.message || 'Failed to logout session', 'error');
+          }
+        } catch (error) {
+          console.error('Session logout error:', error);
+          showNotification('Error logging out session', 'error');
+        } finally {
+          button.disabled = false;
+          button.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        }
       }
 
+      // ===== LOGOUT =====
       async function performLogout() {
         try {
           logoutBtn.disabled = true;
@@ -1321,12 +1824,167 @@
         }
       }
 
+      // ===== MODAL FUNCTIONS =====
+      function openModal() {
+        settingsModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        settingsModal.classList.remove('show');
+        document.body.style.overflow = '';
+        usernameMessage.className = 'message';
+        usernameMessage.textContent = '';
+        passwordMessage.className = 'message';
+        passwordMessage.textContent = '';
+      }
+
+      settingsBtn.addEventListener('click', openModal);
+      settingsModalClose.addEventListener('click', closeModal);
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeModal();
+      });
+
+      // ===== CHANGE USERNAME =====
+      changeUsernameForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        usernameMessage.className = 'message';
+        usernameMessage.textContent = '';
+
+        const newUsername = newUsernameInput.value.trim();
+
+        if (newUsername.length < 3) {
+          usernameMessage.className = 'message show error';
+          usernameMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Username must be at least 3 characters';
+          return;
+        }
+
+        if (newUsername.length > 20) {
+          usernameMessage.className = 'message show error';
+          usernameMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Username must be less than 20 characters';
+          return;
+        }
+
+        changeUsernameBtn.disabled = true;
+        changeUsernameBtn.innerHTML = '<span class="spinner"></span> Updating...';
+
+        try {
+          const response = await fetch(CHANGE_USERNAME_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userName: newUsername }),
+            credentials: 'same-origin'
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            usernameMessage.className = 'message show success';
+            usernameMessage.innerHTML = '<i class="fas fa-check-circle"></i> Username updated successfully!';
+            showNotification('Username updated successfully!', 'success');
+            newUsernameInput.value = '';
+            setTimeout(() => {
+              closeModal();
+              window.location.reload();
+            }, 1500);
+          } else if (response.status === 401 || response.status === 403) {
+            handleFetchError({ status: response.status }, 'username change');
+          } else {
+            usernameMessage.className = 'message show error';
+            usernameMessage.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || data.status || 'Failed to update username'}`;
+          }
+        } catch (error) {
+          console.error('Username change error:', error);
+          usernameMessage.className = 'message show error';
+          usernameMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error. Please try again.';
+        } finally {
+          changeUsernameBtn.disabled = false;
+          changeUsernameBtn.innerHTML = '<i class="fas fa-save"></i> <span>Update Username</span>';
+        }
+      });
+
+      // ===== CHANGE PASSWORD =====
+      changePasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        passwordMessage.className = 'message';
+        passwordMessage.textContent = '';
+
+        const currentPassword = currentPasswordInput.value;
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+          passwordMessage.className = 'message show error';
+          passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please fill in all fields';
+          return;
+        }
+
+        if (newPassword.length < 8) {
+          passwordMessage.className = 'message show error';
+          passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password must be at least 8 characters';
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          passwordMessage.className = 'message show error';
+          passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Passwords do not match';
+          return;
+        }
+
+        changePasswordBtn.disabled = true;
+        changePasswordBtn.innerHTML = '<span class="spinner"></span> Updating...';
+
+        try {
+          const response = await fetch(CHANGE_PASSWORD_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              oldpwd: currentPassword,
+              newpwd: newPassword
+            }),
+            credentials: 'same-origin'
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            passwordMessage.className = 'message show success';
+            passwordMessage.innerHTML = '<i class="fas fa-check-circle"></i> Password updated successfully!';
+            showNotification('Password updated successfully!', 'success');
+            currentPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+            setTimeout(() => {
+              closeModal();
+              window.location.reload();
+            }, 1500);
+          } else if (response.status === 401 || response.status === 403) {
+            handleFetchError({ status: response.status }, 'password change');
+          } else {
+            passwordMessage.className = 'message show error';
+            passwordMessage.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || data.status || 'Failed to update password'}`;
+          }
+        } catch (error) {
+          console.error('Password change error:', error);
+          passwordMessage.className = 'message show error';
+          passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error. Please try again.';
+        } finally {
+          changePasswordBtn.disabled = false;
+          changePasswordBtn.innerHTML = '<i class="fas fa-save"></i> <span>Update Password</span>';
+        }
+      });
+
+      // ===== INITIALIZATION =====
       fetchStatus();
       fetchMessages();
 
+      // Poll messages every 2 seconds
       setInterval(fetchMessages, 2000);
+
+      // Poll status every 5 seconds
       setInterval(fetchStatus, 5000);
 
+      // Event listeners
       refreshBtn.addEventListener('click', (e) => {
         e.preventDefault();
         fetchStatus();
@@ -1336,10 +1994,19 @@
 
       logoutBtn.addEventListener('click', performLogout);
       
-      docsBtn.addEventListener('click', ()=>{
+      docsBtn.addEventListener('click', () => {
         window.open("/docs", "_blank");
       });
+
+      // Keyboard shortcut for modal (Escape key)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && settingsModal.classList.contains('show')) {
+          closeModal();
+        }
+      });
+
     })();
   </script>
+
 </body>
 </html>
