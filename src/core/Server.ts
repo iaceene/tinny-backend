@@ -23,7 +23,6 @@ import { fileURLToPath } from 'url';
 import { readdir } from 'node:fs/promises';
 import RequestParser from "./Request.js";
 import ResponseParser from "./Response.js";
-import monitor from "../admin/monitor.js";
 
 
 export default class Server {
@@ -165,7 +164,7 @@ export default class Server {
                         method: "GET",
                         path: `/${path.dirname(prefix)}`,
                         handler: (req: ServerReq, res: ServerRes)=>{
-                            this.SendFile(res, filename, 200)
+                            await this.SendFile(res, filename, 200)
                             return
                         },
                         middelWares
@@ -226,9 +225,8 @@ export default class Server {
             return res.sendFile(status, contentType, { PATH: `./${FILE}` });
         } catch (err) {
             console.log(err)
-            const errorPagePath = path.join(__dirname, 'public', 'stauts/404.html');
             res.server.log(`cannot find ${FILE} to send to ${res.ip }`, "error")
-            return res.sendFile(404, 'text/html', { PATH: errorPagePath });
+            return res.send(404, {status: "Page not found"})
         }
     }
 
@@ -263,7 +261,7 @@ export default class Server {
 
         this.defaultHandler = args.DefaultHandler ?? ( async (req: ServerReq, res: ServerRes)=> {
                 this.log(`Sending defualt of this route ${req.ReqUrl?.pathname}`)
-                await this.SendFile(res, "public/status/404.html", 404);
+                return res.send(404, {status: "Page not found"});
             })
 
 
@@ -340,8 +338,6 @@ export default class Server {
     }
 
     listen(enableMon?: boolean, callback?: () => void){
-        if (enableMon)
-            monitor(new Server({port: this.PORT + 1, ServerName: "Monitor"}));
         this.server.listen(this.PORT, callback ?? (()=>{
             this.log(`start listening in http://${this.hostname}:${this.PORT}`)
         }))
