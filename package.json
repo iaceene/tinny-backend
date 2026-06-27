@@ -1,7 +1,7 @@
 {
   "name": "tinny-backend",
   "version": "1.0.0",
-  "description": "A lightweight and flexible routing system for Node.js with WebSocket support",
+  "description": "A lightweight and flexible backend framework built on Node.js.",
   "license": "MIT",
   "author": {
     "name": "Yassine Ajagrou",
@@ -10,31 +10,29 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iaceene/TinnyBackend.git"
+    "url": "git+https://github.com/iaceene/tinny-backend.git"
   },
   "bugs": {
-    "url": "https://github.com/iaceene/TinnyBackend/issues"
+    "url": "https://github.com/iaceene/tinny-backend/issues"
   },
-  "homepage": "https://github.com/iaceene/TinnyBackend#readme",
+  "homepage": "https://github.com/iaceene/tinny-backend#readme",
   "keywords": [
+    "backend",
+    "framework",
     "router",
     "routing",
-    "express",
-    "websocket",
-    "ws",
+    "http",
+    "node",
     "nodejs",
     "typescript",
-    "jwt",
-    "authentication"
+    "server"
   ],
   "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
@@ -46,44 +44,28 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --exec tsx src/app/index.ts",
-    "example": "node ./dist/app/index.js",
+    "dev": "tsx src/index.ts",
     "test": "vitest",
-    "test:coverage": "vitest --coverage",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
-    "prepublishOnly": "npm run build",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
-  },
-  "peerDependencies": {
-    "node": ">=18.0.0"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.3",
-    "@types/ws": "^8.18.1",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
-    "nodemon": "^3.1.14",
-    "prettier": "^3.2.5",
-    "tsx": "^4.7.0",
-    "typescript": "^5.7.3",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
     "vitest": "^4.1.9"
-  },
-  "dependencies": {
-    "dotenv": "^17.4.2",
-    "jsonwebtoken": "^9.0.3",
-    "ws": "^8.21.0"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "private": false
 }
