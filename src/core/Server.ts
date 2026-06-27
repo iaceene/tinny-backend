@@ -164,7 +164,7 @@ export default class Server {
                         method: "GET",
                         path: `/${path.dirname(prefix)}`,
                         handler: (req: ServerReq, res: ServerRes)=>{
-                            await this.SendFile(res, filename, 200)
+                            this.SendFile(res, filename, 200)
                             return
                         },
                         middelWares
