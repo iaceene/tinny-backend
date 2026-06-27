@@ -1,4 +1,4 @@
-# TinnyBackend
+# tinny-backend
 
 A lightweight routing system for Node.js with built-in file serving, JWT authentication, and monitoring capabilities.
 
@@ -17,13 +17,13 @@ A lightweight routing system for Node.js with built-in file serving, JWT authent
 ## Installation
 
 ```bash
-npm install tinnybackend
+npm install tinny-backend
 ```
 
 ## Quick Start
 
 ```typescript
-import Server from 'tinnybackend';
+import Server from 'tinny-backend';
 
 const server = new Server({
   port: 3000,
@@ -203,5 +203,5 @@ Yassine Ajagrou
 
 ## Links
 
-- [GitHub Repository](https://github.com/iaceene/TinnyBackend)
-- [npm Package](https://www.npmjs.com/package/tinnybackend)
+- [GitHub Repository](https://github.com/iaceene/tinny-backend)
+- [npm Package](https://www.npmjs.com/package/tinny-backend)
