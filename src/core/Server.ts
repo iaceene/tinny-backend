@@ -278,8 +278,9 @@ export default class Server {
             })
             
             req.on("end", async ()=>{
-        
-                Req.body = body ? JSON.parse(body) : null
+                if (req.headers["content-type"] === "application/json"){
+                    Req.body = body ? JSON.parse(body) : null
+                }
                 body = "";
 
                 let handlersCount = 0

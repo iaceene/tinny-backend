@@ -20,7 +20,11 @@ export default function RequestParser(req: ServerReq, server: Server): ServerReq
         (req.ReqUrl as any).pathname = req.url;
         req.queries = {}
     }
-    req.ip = req.socket.remoteAddress?.split(':').pop() ?? "DEVICE IP";
+    req.ip = req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() 
+            || req.headers["x-real-ip"]?.toString()
+            || req.socket.remoteAddress
+            || "UNKNOWN_IP";
+
     req.server = server
 
     server.log(`${req.ip} requested METHOD ${req.method}, PATH ${req.ReqUrl?.pathname}`);
