@@ -22,7 +22,7 @@ export default function RequestParser(req: ServerReq, server: Server): ServerReq
     }
     req.ip = req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() 
             || req.headers["x-real-ip"]?.toString()
-            || req.socket.remoteAddress
+            || req.socket.remoteAddress?.split(':').pop()
             || "UNKNOWN_IP";
 
     req.server = server
