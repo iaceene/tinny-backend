@@ -267,6 +267,8 @@ export default class Server {
 
         this.server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse)=>{
             let body: string = "";
+            const rawChunks: Buffer[] = [];
+
             this.reqCount++;
             
             const Req: ServerReq = RequestParser((req as ServerReq), this);
@@ -275,9 +277,11 @@ export default class Server {
             
             req.on("data", (chunk) => {
                 body += chunk.toString();
+                rawChunks.push(chunk);
             })
             
             req.on("end", async ()=>{
+                Req.RawBody = Buffer.concat(rawChunks)
                 if (req.headers["content-type"] === "application/json"){
                     Req.body = body ? JSON.parse(body) : null
                 }

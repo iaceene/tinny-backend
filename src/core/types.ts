@@ -41,6 +41,7 @@ export type ServerReq = http.IncomingMessage & {
     Query: URLSearchParams,
     queries: object,
     body?: any,
+    RawBody: Buffer
     ip: string,
     server: Server,
     params: Record<string, string>,
