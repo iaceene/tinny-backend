@@ -281,6 +281,8 @@ export default class Server {
                 if (req.headers["content-type"] === "application/json"){
                     Req.body = body ? JSON.parse(body) : null
                 }
+                
+                Req.body = body;
                 body = "";
 
                 let handlersCount = 0
