@@ -10,6 +10,7 @@ import type {
     Session,
     Logs,
     DirFiles,
+    GolobalMidellWare,
 } from "./types.js";
 
 import { colors } from "../utils/constants.js";
@@ -38,6 +39,7 @@ export default class Server {
     private logs: Logs[]
     private ServerName: string
     private defaultHandler: HandlerFun
+    private golobalMidellWare: GolobalMidellWare[]
     private Wss: TinnyWs | null = null;
 
     getMethodHandlers(){
@@ -103,6 +105,10 @@ export default class Server {
 
     getPort(){
         return this.PORT
+    }
+
+    use(fun: HandlerFun){
+        this.golobalMidellWare.push({ handler: fun })
     }
 
     add(opt: AddOption){
@@ -265,6 +271,7 @@ export default class Server {
     }
 
     constructor(args: ServerOptions){
+        this.golobalMidellWare = []
         this.sessions = []
         this.decorators = []
         this.methodHandler = []
@@ -306,6 +313,15 @@ export default class Server {
                 body = "";
 
                 let handlersCount = 0
+                
+                for (const fun of this.golobalMidellWare){
+                    await fun.handler(req as ServerReq, res as ServerRes)
+                    if (res.writableEnded){
+                        handlersCount++;
+                        break;
+                    }
+                }
+
                 for(let i = 0; i < this.methodHandler.length; i++){
                     const match = Req.ReqUrl?.pathname.match(this.methodHandler[i]?.regex ?? "")
                     if (this.methodHandler[i]?.method == req.method 

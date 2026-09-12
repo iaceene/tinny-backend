@@ -28,6 +28,10 @@ export type Cookie = {
     value: string
 }
 
+export type GolobalMidellWare = {
+    handler: HandlerFun
+}
+
 export type ServerOptions = {
     port?: number,
     hostname?: string,

@@ -1,6 +1,6 @@
 {
   "name": "tinny-backend",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A lightweight and flexible backend framework built on Node.js.",
   "license": "MIT",
   "author": {
@@ -46,6 +46,7 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "test-ws": "tsx src/test/ws.test.ts",
+    "test-use": "tsx src/test/use.test.ts",
     "test": "vitest",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
