@@ -312,16 +312,6 @@ export default class Server {
                 Req.body = body;
                 body = "";
 
-                let handlersCount = 0
-                
-                for (const fun of this.golobalMidellWare){
-                    await fun.handler(req as ServerReq, res as ServerRes)
-                    if (res.writableEnded){
-                        handlersCount++;
-                        break;
-                    }
-                }
-
                 for(let i = 0; i < this.methodHandler.length; i++){
                     const match = Req.ReqUrl?.pathname.match(this.methodHandler[i]?.regex ?? "")
                     if (this.methodHandler[i]?.method == req.method 
@@ -331,24 +321,28 @@ export default class Server {
                         this.methodHandler[i]?.paramNames.forEach((name, index) => {
                             Req.params[name] = match[index + 1] || "";
                         })
-                        if (!Res.isClosed) {
+                        if (!res.writableEnded) {
                             if (this.methodHandler[i]?.middelWares && typeof this.methodHandler[i]?.middelWares != "undefined") {
                                 for (const middelware of this.methodHandler[i]?.middelWares ?? []) {
                                     await middelware(Req, Res);
-                                    if (Res.isClosed)
+                                    if (res.writableEnded)
                                         break;
                                 }
                             }
-                            if (!Res.isClosed)
+                            if (!res.writableEnded)
                                 await this.methodHandler[i]?.handler(req, res);
                             const nextFn = this.methodHandler[i]?.next
-                            if (typeof nextFn === "function")
+                            if (typeof nextFn === "function" && !res.writableEnded)
                                 await nextFn(Req, Res)
-                            handlersCount++
                         }
                     }
                 }
-                if (!handlersCount){
+                for (const fun of this.golobalMidellWare){
+                    if (res.writableEnded)
+                        break;
+                    await fun.handler(req as ServerReq, res as ServerRes)
+                }
+                if (!res.writableEnded){
                     this.defaultHandler(Req, Res)
                 }
             })
