@@ -314,9 +314,7 @@ export default class Server {
 
                 for(let i = 0; i < this.methodHandler.length; i++){
                     const match = Req.ReqUrl?.pathname.match(this.methodHandler[i]?.regex ?? "")
-                    if (this.methodHandler[i]?.method == req.method 
-                        && match
-                    ){
+                    if (this.methodHandler[i]?.method == req.method && match){
                         Req.params = {}
                         this.methodHandler[i]?.paramNames.forEach((name, index) => {
                             Req.params[name] = match[index + 1] || "";
@@ -335,6 +333,7 @@ export default class Server {
                             if (typeof nextFn === "function" && !res.writableEnded)
                                 await nextFn(Req, Res)
                         }
+                        break;
                     }
                 }
                 for (const fun of this.golobalMidellWare){
