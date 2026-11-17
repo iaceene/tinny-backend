@@ -35,6 +35,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install Dependencies
+        run: |
+          bun install
+          cd docs && bun install
+
       - name: Run Test Suite
         run: |
           bun test src/test/framework.spec.ts
