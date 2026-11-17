@@ -1,0 +1,20 @@
+# Source and tests
+src/
+*.test.ts
+*.spec.ts
+
+# Documentation website and assets
+docs/
+
+# CI/CD and Git
+.github/
+.git/
+.gitignore
+
+# Environment and logs
+.env
+*.log
+
+# Lockfiles & configs
+bun.lock
+tsconfig.json

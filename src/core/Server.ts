@@ -4,7 +4,6 @@ import type {
     ServerRes, 
     Handlers, 
     AddOption,
-    Methods,
     HandlerFun,
     Decorator,
     Session,
@@ -16,15 +15,14 @@ import type {
 import { colors } from "../utils/constants.js";
 
 import { randomBytes } from "crypto"
-import fs from "fs"
 import path, { join } from "path"
 import * as http from "http"
 import * as net from "net"
-import { fileURLToPath } from 'url';
 import { readdir } from 'node:fs/promises';
 import RequestParser from "./Request.js";
 import ResponseParser from "./Response.js";
 import { TinnyWs } from "./Websocket.js";
+import { dir } from "node:console";
 
 
 export default class Server {
@@ -150,7 +148,7 @@ export default class Server {
 
             for (const entry of entries)
                 if (!entry.isDirectory())
-                    result.files.push({ FileName: join(entry.parentPath, entry.name), prefix :  join(prefix, entry.name) })
+                    result.files.push({ fileName: entry.name, filePath: join(entry.parentPath, entry.name), prefix :  path.join(prefix, path.relative(DIR, entry.parentPath), entry.name) })
             return result;
         } 
         catch (error) {
@@ -159,103 +157,44 @@ export default class Server {
         return null;
     }
 
-    async servDir(DIR: string, pref: string, middelWares?: HandlerFun[]){
-        let files: DirFiles | null = null
+    async servDir(DIR: string, pref: string, entryPointFile?: string, middelWares?: HandlerFun[]){
         try {
-            files = await this.readDir(DIR, pref)
-            
-        } catch {
-            this.log("an error happens when try to server a dir", "error")
-        }
-        if (!files){
-            this.log("Failed to serve this dir", "error")
-            return;
-        }
-
-        let index = false;
-        for (let i = 0; i < files.files.length; i++){
-            const filename = files.files[i]?.FileName.replace(/^\/+/, "/");
-            const prefix = files.files[i]?.prefix.replace(/^\/+/, "/");
-            if (!filename || !prefix)
-                break;
-            if ((path.basename(filename).startsWith("index") && path.dirname(filename) == DIR.replace(/\.\//g, '')) && !index){
-                    this.log(
-                        `setting ${filename} as default page for ${DIR}`
+            const dirs = await this.readDir(DIR, pref)
+            if (!dirs)
+                throw new Error(`Cannot read dirctory content ${DIR}`);
+            dirs.files.forEach((file)=>{
+                if (entryPointFile && path.join(pref, entryPointFile) === file.prefix){
+                    this.add(
+                        {
+                            handler: (req, res) => {
+                                return res.sendFile(file.filePath, 200);
+                            },
+                            path: pref,
+                            method: "GET",
+                            middelWares
+                        }
                     )
-                    this.add({
-                        method: "GET",
-                        path: `/${path.dirname(prefix)}`,
-                        handler: (req: ServerReq, res: ServerRes)=>{
-                            this.SendFile(res, filename, 200)
-                            return
+                }
+                this.add(
+                    {
+                        handler: (req, res) => {
+                            return res.sendFile(file.filePath, 200);
                         },
+                        path: file.prefix,
+                        method: "GET",
                         middelWares
-                    })
-                    index = true;
-            }
-            this.add({
-                method: "GET",
-                path: `/${prefix}`,
-                handler: async (req: ServerReq, res: ServerRes)=>{
-                    await this.SendFile(res, filename, 200)
-                    return
-                },
-                middelWares
+                    }
+                )
             })
-        }
-        if (!index){
-            this.add({
-                method: "GET",
-                path: `/${pref}`,
-                handler: async (req: ServerReq, res: ServerRes)=>{
-                    res.send(200, {
-                        ...files.files.map((file)=> {
-                            return {
-                                    "name" : path.basename(file.FileName),
-                                    "url": `http://${this.hostname}:${this.PORT}/${file.prefix}`
-                                }
-                        })
-                    })
-                },
-                middelWares
-            })
-        }
-    }
-
-    async SendFile(res: ServerRes, FILE: string, status: number): Promise<void>{
-        const __filename = fileURLToPath(import.meta.url);
-        const projectRoot = path.resolve(__filename, '..', '..');
-        const __dirname = projectRoot;
-        const extName = String(path.extname(FILE)).toLowerCase()
-        const mimeTypes = {
-            '.txt': 'text/plain',
-            '.html': 'text/html',
-            '.css': 'text/css',
-            '.js': 'text/javascript',
-            '.png': 'image/png',
-            '.jpg': 'image/jpeg',
-            '.json': 'application/json',
-            '.mp4': 'video/mp4',
-            '.webm' : 'video/webm',
-            '.ogg' : 'video/ogg',
-            '.avi' : 'video/x-msvideo'
-        };
-        const contentType = (mimeTypes as any)[extName] || 'application/octet-stream';
-        try {
-            await fs.promises.access(`./${FILE}`, fs.constants.F_OK);
-            res.server.log(`sending file ${FILE} to ${res.ip }`, (status == 404 || status == 401) ? "error" : "message")
-            return res.sendFile(status, contentType, { PATH: `./${FILE}` });
-        } catch (err) {
-            console.log(err)
-            res.server.log(`cannot find ${FILE} to send to ${res.ip }`, "error")
-            return res.send(404, {status: "Page not found"})
+        } catch (err: any) {
+            this.log((err as Error).message, "error")
+            return;
         }
     }
 
     log(message: string, type?: "error" | "message"){
         const DateObj = new Date();
         const date = `${DateObj.toDateString() + " " + DateObj.toLocaleTimeString()}`
-        const newType = type ?? message;
 
         console.log(`[${colors.green}${date}${colors.reset}]`, 
                 `[${colors.yellow}${this.ServerName}${colors.reset}] =>`, 
@@ -306,10 +245,14 @@ export default class Server {
             req.on("end", async ()=>{
                 Req.RawBody = Buffer.concat(rawChunks)
                 if (req.headers["content-type"] === "application/json"){
-                    Req.body = body ? JSON.parse(body) : null
+                    try {
+                        Req.body = body ? JSON.parse(body) : null;
+                    } catch {
+                        Req.body = body;
+                    }
+                } else {
+                    Req.body = body;
                 }
-                
-                Req.body = body;
                 body = "";
 
                 for(let i = 0; i < this.methodHandler.length; i++){
@@ -328,7 +271,7 @@ export default class Server {
                                 }
                             }
                             if (!res.writableEnded)
-                                await this.methodHandler[i]?.handler(req, res);
+                                await this.methodHandler[i]?.handler(Req, Res);
                             const nextFn = this.methodHandler[i]?.next
                             if (typeof nextFn === "function" && !res.writableEnded)
                                 await nextFn(Req, Res)
@@ -369,7 +312,7 @@ export default class Server {
         })
     }
 
-    listen(enableMon?: boolean, callback?: () => void){
+    listen(callback?: () => void){
         this.server.listen(this.PORT, callback ?? (()=>{
             this.log(`start listening in http://${this.hostname}:${this.PORT}`)
         }))

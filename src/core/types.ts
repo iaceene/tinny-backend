@@ -52,7 +52,8 @@ export type ServerReq = http.IncomingMessage & {
 }
 
 export type ServFiles = {
-    FileName: string,
+    fileName: string;
+    filePath: string;
     prefix: string
 }
 
@@ -64,7 +65,7 @@ export type ServerRes = http.ServerResponse & {
     body?: any,
     ip: string,
     send: (status: number, data?: any, headers?: object)=>void,
-    sendFile: (status: number, ContentType: string, data?: any, headers?: object)=>void,
+    sendFile: (path: string, status: number, headers?: object)=>void,
     isClosed: boolean,
     server: Server
     coockie: (key: string, value: string)=>string

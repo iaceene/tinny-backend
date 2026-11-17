@@ -3,3 +3,4 @@ node_modules/
 .env
 package-lock.json
 .DS_Store
+docs/node_modules/

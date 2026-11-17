@@ -5,6 +5,7 @@ import type {
     ServerReq,
     Cookie
 } from "./types.js"
+import path from "path"
 
 
 export default function ResponseParser(res: ServerRes, req: ServerReq, server: Server): ServerRes {
@@ -71,31 +72,54 @@ export default function ResponseParser(res: ServerRes, req: ServerReq, server: S
                 server.log(`Multipple replays on ${req.url}`, "error")
             }
         }
-    res.sendFile = async (status: number, ContentType: string, data?: any, headers?: object)=>
+    res.sendFile = async (FILE: string, status: number, headers?: object)=>
         {
-            if (!res.isClosed)
-                {
-                    try 
-                    {
-                        const fileData = await fs.promises.readFile(data.PATH);
-                        if (res.isClosed)
-                            return;
-                        res.writeHead(status, { 'Content-Type': ContentType, ...headers });
-                        res.end(fileData);
-                        res.isClosed = true;
-                    }
-                    catch
-                    {
-                        if (res.isClosed)
-                            return;
-                        res.writeHead(500, { 'Content-Type': 'text/plain' });
-                        res.end('500 - Internal Error or File Not Found');
-                        res.isClosed = true;
-                        return;
-                    }
+            const extName = String(path.extname(FILE)).toLowerCase()
+            const mimeTypes = {
+                        '.txt': 'text/plain',
+                        '.html': 'text/html',
+                        '.css': 'text/css',
+                        '.js': 'text/javascript',
+                        '.png': 'image/png',
+                        '.jpg': 'image/jpeg',
+                        '.json': 'application/json',
+                        '.mp4': 'video/mp4',
+                        '.webm' : 'video/webm',
+                        '.ogg' : 'video/ogg',
+                        '.avi' : 'video/x-msvideo'
+            };
+            const contentType = (mimeTypes as any)[extName] || 'application/octet-stream';
+            try {
+                    await fs.promises.access(FILE, fs.constants.F_OK);
+                    res.server.log(`Sending ${FILE} to ${res.ip }`, (status == 404 || status == 401) ? "error" : "message")
+                    if (!res.isClosed)
+                        {
+                            try 
+                            {
+                                const fileData = await fs.promises.readFile(FILE);
+                                if (res.isClosed)
+                                    return;
+                                res.writeHead(status, { 'Content-Type': contentType, ...headers });
+                                res.end(fileData);
+                                res.isClosed = true;
+                            }
+                            catch (err)
+                            {
+                                server.log(`cannot read the content of ${FILE}`, "error");
+                                if (res.isClosed)
+                                    return;
+                                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                                res.end('500 - Internal Error or File Not Found');
+                                res.isClosed = true;
+                                return;
+                            }
+                        }
+                        else
+                            server.log(`Multipple replays on ${req.url}`, "error");
+                } catch (err) {
+                    res.server.log(`cannot find ${FILE} to send to ${res.ip }`, "error")
+                    return res.send(404, { status: "Page not found" })
                 }
-                else
-                    server.log(`Multipple replays on ${req.url}`, "error");
         }
 
     return res;
